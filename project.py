@@ -16,13 +16,13 @@ from pygame.locals import (
 
 DEBUG_MODE = True
 
-cell_size = 0.1
-block_size_coefficient = 2.6
+cell_size = 0.09
+block_size_coefficient = 2.5
 room_height = 10.0
 room_width = 20.0
 rows = int(room_width / cell_size)
 cols = int(room_height / cell_size)
-window_width = 1000
+window_width = 1300
 window_height = (window_width * cols) / rows
 
 
