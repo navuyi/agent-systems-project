@@ -28,8 +28,7 @@ window_height = (window_width * cols) / rows
 
 class ExitCell(object):
     def __init__(self, pos_x, pos_y):
-        self.color = (255, 0, 0)
-
+        self.color = (255, 0, 255)
         self.pos_x = pos_x
         self.pos_y = pos_y
 
@@ -92,7 +91,7 @@ def update(grid):
     return newGrid
 
 
-def drawGrid(screen, grid, w_width, w_height, humans):
+def drawGrid(screen, grid, w_width, w_height, humans, exit_cell):
     white_color = (255, 255, 255)
     rows, cols = grid.shape
     blockSize = ((min(w_width, w_height) - max(rows, cols)) / max(rows, cols)) * block_size_coefficient
@@ -104,6 +103,7 @@ def drawGrid(screen, grid, w_width, w_height, humans):
             rect = pygame.Rect(pos_x, pos_y, blockSize, blockSize)
             pygame.draw.rect(screen, white_color, rect, 0)  
 
+    # Iterating over humans and drawing them...
     for human in humans:
         human_cells = human.get_body_cells()
         human_color = human.get_color()
@@ -114,6 +114,12 @@ def drawGrid(screen, grid, w_width, w_height, humans):
             pos_y = (blockSize + 1) * y
             rect = pygame.Rect(pos_x, pos_y, blockSize, blockSize)
             pygame.draw.rect(screen, human_color, rect, 0)  
+
+    # Drawing exit cell...
+    pos_x = (blockSize + 1) * exit_cell.pos_x
+    pos_y = (blockSize + 1) * exit_cell.pos_y
+    rect = pygame.Rect(pos_x, pos_y, blockSize, blockSize)
+    pygame.draw.rect(screen, exit_cell.color, rect, 0)  
 
     pygame.display.flip()
 
@@ -128,10 +134,10 @@ if __name__ == "__main__":
 
     grid = initGrid(rows, cols)
 
-    exit_cell = ExitCell(100, 100)
+    exit_cell = ExitCell(175, 50)
     humans = [Human(20, 20, exit_cell, grid)]
 
-    drawGrid(screen, grid, window_width, window_height, humans)
+    drawGrid(screen, grid, window_width, window_height, humans, exit_cell)
 
     running = True
 
