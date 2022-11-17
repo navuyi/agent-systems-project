@@ -35,8 +35,8 @@ class ExitCell(object):
 
 class Human(object):
     def __init__(self, cell_pos_x, cell_pos_y, first_known_exit_cell, grid):
-        #self.color = (np.random.randint(256, size=1), np.random.randint(256, size=1), np.random.randint(256, size=1))
-        self.color = (255, 0, 0)
+        self.color = (np.random.randint(256, size=1), np.random.randint(256, size=1), np.random.randint(256, size=1))
+        #self.color = (255, 0, 0)
         self.pos_x = cell_pos_x
         self.pos_y = cell_pos_y
 
@@ -135,7 +135,7 @@ if __name__ == "__main__":
     grid = initGrid(rows, cols)
 
     exit_cell = ExitCell(175, 50)
-    humans = [Human(20, 20, exit_cell, grid)]
+    humans = [Human(20, 20, exit_cell, grid), Human(30, 30, exit_cell, grid)]
 
     drawGrid(screen, grid, window_width, window_height, humans, exit_cell)
 
