@@ -38,10 +38,9 @@ class Human(object):
         self.cell_center_pos_x = self.pos_x + (cell_size / 2)
         self.cell_center_pos_y = self.pos_y + (cell_size / 2)
 
-        self.known_exit_cell_pos_x = first_known_exit_cell.pos_x
-        self.known_exit_cell_pos_y = first_known_exit_cell.pos_y
-
         self.look_angle_alpha = 0.0
+
+        self.calculate_moving_direction(first_known_exit_cell.pos_x, first_known_exit_cell.pos_y)
 
     def get_body_cells(self):
         return self.body_cells
@@ -65,6 +64,12 @@ class Human(object):
                     body_cells.append((dx + self.pos_x, dy + self.pos_y))
 
         self.body_cells = body_cells
+    
+    def calculate_moving_direction(self, exit_x, exit_y):
+        delta_x = self.pos_x - exit_x
+        delta_y = self.pos_y - exit_y
+        tangent_radians = math.atan2(delta_y, delta_x)
+        self.look_angle_alpha = math.degrees(tangent_radians)
 
 
 def init_grid(rows, cols, humans, exit_cell):
