@@ -14,7 +14,7 @@ from pygame.locals import (
 
 DEBUG_MODE = True
 
-cell_size = 0.09
+cell_size = 0.1
 block_size_coefficient = 2.5
 room_height = 10.0
 room_width = 20.0
@@ -73,7 +73,6 @@ class Human(object):
         self.look_angle_alpha = math.degrees(tangent_radians)
     
     def move(self):
-        print("{} Angle Degrees: {}".format(self.name, self.look_angle_alpha))
         if self.look_angle_alpha < 0:
             self.pos_y += 1
         else:
