@@ -31,7 +31,8 @@ class ExitCell(object):
 
 
 class Human(object):
-    def __init__(self, cell_pos_x, cell_pos_y, first_known_exit_cell):
+    def __init__(self, name, cell_pos_x, cell_pos_y, first_known_exit_cell):
+        self.name = name
         self.pos_x = cell_pos_x
         self.pos_y = cell_pos_y
 
@@ -70,6 +71,20 @@ class Human(object):
         delta_y = self.pos_y - exit_y
         tangent_radians = math.atan2(delta_y, delta_x)
         self.look_angle_alpha = math.degrees(tangent_radians)
+    
+    def move(self):
+        print("{} Angle Degrees: {}".format(self.name, self.look_angle_alpha))
+        if self.look_angle_alpha < 0:
+            self.pos_y += 1
+        else:
+            self.pos_y -= 1
+        if self.look_angle_alpha < -90 or self.look_angle_alpha > 90:
+            self.pos_x += 1
+        else:
+            self.pos_x -= 1
+        
+        self.cell_center_pos_x = self.pos_x + (cell_size / 2)
+        self.cell_center_pos_y = self.pos_y + (cell_size / 2)
 
 
 def init_grid(rows, cols, humans, exit_cell):
@@ -87,9 +102,12 @@ def init_grid(rows, cols, humans, exit_cell):
 
 
 def update_grid(grid, humans, exit_cell):
-    new_grid = grid.copy()
+    for human in humans:
+        human.move()
+        human.calculate_moving_direction(exit_cell.pos_x, exit_cell.pos_y)
 
-
+    rows, cols = grid.shape
+    new_grid = init_grid(rows, cols, humans, exit_cell)
 
     return new_grid
 
@@ -121,8 +139,13 @@ if __name__ == "__main__":
     screen.fill((128, 128, 128))
     clock = pygame.time.Clock()
 
-    exit_cell = ExitCell(175, 50)
-    humans = [Human(20, 20, exit_cell), Human(30, 30, exit_cell)]
+    exit_cell = ExitCell(100, 50)
+    humans = [
+        Human('first', 30, 20, exit_cell),
+        Human('second', 30, 75, exit_cell),
+        Human('third', 150, 20, exit_cell),
+        Human('fourth', 150, 75, exit_cell)
+    ]
     grid = init_grid(rows, cols, humans, exit_cell)
 
     draw_grid(screen, grid, window_width, window_height)
