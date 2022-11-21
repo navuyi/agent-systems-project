@@ -51,17 +51,18 @@ class Human(object):
         a_pow_2 = math.pow(a, 2)
         b = 1.5
         b_pow_2 = math.pow(b, 2)
+        angle_radians = math.radians(self.look_angle_alpha)
+        sine_angle = math.sin(angle_radians)
+        cosine_angle = math.cos(angle_radians)
 
         body_cells = []
         for dy in [-4, -3, -2, -1, 0, 1, 2, 3, 4]:
             for dx in [-4, -3, -2, -1, 0, 1, 2, 3, 4]:
-                dcell_x = dx + self.pos_x
-                dcell_y = dy + self.pos_y
-                num_x_pow_2 = math.pow(dx, 2)
-                num_y_pow_2 = math.pow(dy, 2)
+                num_x_pow_2 = math.pow((dx) * cosine_angle + (dy) * sine_angle, 2)
+                num_y_pow_2 = math.pow((dx) * sine_angle - (dy) * cosine_angle, 2)
                 result = num_x_pow_2 / a_pow_2 + num_y_pow_2 / b_pow_2
                 if result <= 1:
-                    body_cells.append((dcell_x, dcell_y))
+                    body_cells.append((dx + self.pos_x, dy + self.pos_y))
 
         self.body_cells = body_cells
 
