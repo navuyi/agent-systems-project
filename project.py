@@ -1,7 +1,5 @@
 
-from time import sleep
 import numpy as np
-import itertools
 import pygame
 import math
 from pygame.locals import (
@@ -28,15 +26,12 @@ window_height = (window_width * cols) / rows
 
 class ExitCell(object):
     def __init__(self, pos_x, pos_y):
-        self.color = (255, 0, 255)
         self.pos_x = pos_x
         self.pos_y = pos_y
 
 
 class Human(object):
-    def __init__(self, cell_pos_x, cell_pos_y, first_known_exit_cell, grid):
-        self.color = (np.random.randint(256, size=1), np.random.randint(256, size=1), np.random.randint(256, size=1))
-        #self.color = (255, 0, 0)
+    def __init__(self, cell_pos_x, cell_pos_y, first_known_exit_cell):
         self.pos_x = cell_pos_x
         self.pos_y = cell_pos_y
 
@@ -48,27 +43,18 @@ class Human(object):
 
         self.look_angle_alpha = 0.0
 
-        self.calculate_body_cells(grid=grid)
-        
-        if DEBUG_MODE:
-            print("HumanInfo:\nPos: {}, {}\nCenter: {}, {}\nBodyCells: {}".format(
-                self.pos_x, self.pos_y, self.cell_center_pos_x, self.cell_center_pos_y, self.body_cells))
-
     def get_body_cells(self):
         return self.body_cells
 
-    def get_color(self):
-        return self.color
-
-    def calculate_body_cells(self, grid):
+    def calculate_body_cells(self):
         a = 2.5
         a_pow_2 = math.pow(a, 2)
         b = 1.5
         b_pow_2 = math.pow(b, 2)
+
         body_cells = []
         for dy in [-4, -3, -2, -1, 0, 1, 2, 3, 4]:
             for dx in [-4, -3, -2, -1, 0, 1, 2, 3, 4]:
-                # TODO: add collisions
                 dcell_x = dx + self.pos_x
                 dcell_y = dy + self.pos_y
                 num_x_pow_2 = math.pow(dx, 2)
@@ -80,19 +66,31 @@ class Human(object):
         self.body_cells = body_cells
 
 
-def initGrid(rows, cols):
+def init_grid(rows, cols, humans, exit_cell):
     grid = np.zeros(shape=(rows, cols))
+
+    for human in humans:
+        human.calculate_body_cells()
+        body_cells = human.get_body_cells()
+        for bd in body_cells:
+            grid[bd[0], bd[1]] = 1
+
+    grid[exit_cell.pos_x, exit_cell.pos_y] = 1
+
     return grid
 
 
-def update(grid):
-    newGrid = grid.copy()
-
-    return newGrid
+def update_grid(grid, humans, exit_cell):
+    new_grid = grid.copy()
 
 
-def drawGrid(screen, grid, w_width, w_height, humans, exit_cell):
+
+    return new_grid
+
+
+def draw_grid(screen, grid, w_width, w_height):
     white_color = (255, 255, 255)
+    black_color = (0, 0, 0)
     rows, cols = grid.shape
     blockSize = ((min(w_width, w_height) - max(rows, cols)) / max(rows, cols)) * block_size_coefficient
 
@@ -101,25 +99,10 @@ def drawGrid(screen, grid, w_width, w_height, humans, exit_cell):
             pos_x = (blockSize + 1) * x
             pos_y = (blockSize + 1) * y
             rect = pygame.Rect(pos_x, pos_y, blockSize, blockSize)
-            pygame.draw.rect(screen, white_color, rect, 0)  
-
-    # Iterating over humans and drawing them...
-    for human in humans:
-        human_cells = human.get_body_cells()
-        human_color = human.get_color()
-        for cell in human_cells:
-            x = cell[0]
-            y = cell[1]
-            pos_x = (blockSize + 1) * x
-            pos_y = (blockSize + 1) * y
-            rect = pygame.Rect(pos_x, pos_y, blockSize, blockSize)
-            pygame.draw.rect(screen, human_color, rect, 0)  
-
-    # Drawing exit cell...
-    pos_x = (blockSize + 1) * exit_cell.pos_x
-    pos_y = (blockSize + 1) * exit_cell.pos_y
-    rect = pygame.Rect(pos_x, pos_y, blockSize, blockSize)
-    pygame.draw.rect(screen, exit_cell.color, rect, 0)  
+            if grid[x, y] == 0:
+                pygame.draw.rect(screen, white_color, rect, 0)
+            else:
+                pygame.draw.rect(screen, black_color, rect, 0)  
 
     pygame.display.flip()
 
@@ -132,12 +115,11 @@ if __name__ == "__main__":
     screen.fill((128, 128, 128))
     clock = pygame.time.Clock()
 
-    grid = initGrid(rows, cols)
-
     exit_cell = ExitCell(175, 50)
-    humans = [Human(20, 20, exit_cell, grid), Human(30, 30, exit_cell, grid)]
+    humans = [Human(20, 20, exit_cell), Human(30, 30, exit_cell)]
+    grid = init_grid(rows, cols, humans, exit_cell)
 
-    drawGrid(screen, grid, window_width, window_height, humans, exit_cell)
+    draw_grid(screen, grid, window_width, window_height)
 
     running = True
 
@@ -148,7 +130,7 @@ if __name__ == "__main__":
         
             if event.type == KEYDOWN:
                 if event.key == K_RIGHT:
-                    grid = update(grid)
-                    drawGrid(screen, grid, window_width, window_height)
+                    grid = update_grid(grid, humans, exit_cell)
+                    draw_grid(screen, grid, window_width, window_height)
 
     pygame.quit()
