@@ -110,15 +110,18 @@ class Human(object):
 
 
 def init_grid(rows, cols, humans, exit_cell):
-    grid = np.zeros(shape=(rows, cols))
+    white_color = (255, 255, 255)
+    black_color = (0, 0, 0)
+    grid = np.zeros(shape=(rows, cols), dtype=[('x', 'int'), ('y', 'int'), ('z', 'int')])
+    grid.fill(white_color)
 
     for human in humans:
         human.calculate_body_cells()
         body_cells = human.get_body_cells()
         for bd in body_cells:
-            grid[bd[0], bd[1]] = 1
+            grid[bd[0], bd[1]] = black_color
 
-    grid[exit_cell.pos_x, exit_cell.pos_y] = 1
+    grid[exit_cell.pos_x, exit_cell.pos_y] = black_color
 
     return grid
 
@@ -135,8 +138,6 @@ def update_grid(grid, humans, exit_cell):
 
 
 def draw_grid(screen, grid, w_width, w_height):
-    white_color = (255, 255, 255)
-    black_color = (0, 0, 0)
     rows, cols = grid.shape
     blockSize = ((min(w_width, w_height) - max(rows, cols)) / max(rows, cols)) * block_size_coefficient
 
@@ -145,10 +146,7 @@ def draw_grid(screen, grid, w_width, w_height):
             pos_x = (blockSize + 1) * x
             pos_y = (blockSize + 1) * y
             rect = pygame.Rect(pos_x, pos_y, blockSize, blockSize)
-            if grid[x, y] == 0:
-                pygame.draw.rect(screen, white_color, rect, 0)
-            else:
-                pygame.draw.rect(screen, black_color, rect, 0)  
+            pygame.draw.rect(screen, grid[x, y], rect, 0)
 
     pygame.display.flip()
 
