@@ -12,6 +12,8 @@ from pygame.locals import (
     QUIT,
 )
 
+OBSTACLE_SHAPE_ELLIPSE = 0
+
 DEBUG_MODE = True
 
 cell_size = 0.1
@@ -24,15 +26,52 @@ window_width = 1300
 window_height = (window_width * cols) / rows
 
 
+class ShapeEllipse(object):
+    def __init__(self, a, b, rectangle_range):
+        self.a = a
+        self.b = b
+        self.rectangle_range = list(rectangle_range)
+        self.body_cells = None
+
+    def calculate_cells(self, pos_x, pos_y, angle_degrees):
+        a_pow_2 = math.pow(self.a, 2)
+        b_pow_2 = math.pow(self.b, 2)
+        angle_radians = math.radians(angle_degrees)
+        sine_angle = math.sin(angle_radians)
+        cosine_angle = math.cos(angle_radians)
+
+        body_cells = []
+        for dy in self.rectangle_range:
+            for dx in self.rectangle_range:
+                num_x_pow_2 = math.pow((dx) * cosine_angle + (dy) * sine_angle, 2)
+                num_y_pow_2 = math.pow((dx) * sine_angle - (dy) * cosine_angle, 2)
+                result = num_x_pow_2 / a_pow_2 + num_y_pow_2 / b_pow_2
+                if result <= 1:
+                    body_cells.append((dx + pos_x, dy + pos_y))
+
+        self.body_cells = body_cells
+
+    def get_body_cells(self):
+        return self.body_cells
+
+
 class ExitCell(object):
     def __init__(self, pos_x, pos_y):
         self.pos_x = pos_x
         self.pos_y = pos_y
 
 
+class Obstacle(object):
+    def __init__(self, pos_x, pos_y, shape):
+        self.pos_x = pos_x
+        self.pos_y = pos_y
+        self.shape = shape
+
+
 class Human(object):
     def __init__(self, name, cell_pos_x, cell_pos_y, first_known_exit_cell):
         self.name = name
+        self.shape = ShapeEllipse(a=2.5, b=1.5, rectangle_range=range(-4, 5)) # [-4, -3, -2, -1, 0, 1, 2, 3, 4]
         self.pos_x = cell_pos_x
         self.pos_y = cell_pos_y
 
@@ -47,25 +86,9 @@ class Human(object):
         return self.body_cells
 
     def calculate_body_cells(self):
-        a = 2.5
-        a_pow_2 = math.pow(a, 2)
-        b = 1.5
-        b_pow_2 = math.pow(b, 2)
-        angle_radians = math.radians(self.look_angle_alpha)
-        sine_angle = math.sin(angle_radians)
-        cosine_angle = math.cos(angle_radians)
+        self.shape.calculate_cells(pos_x=self.pos_x, pos_y=self.pos_y, angle_degrees=self.look_angle_alpha)
+        self.body_cells = self.shape.get_body_cells()
 
-        body_cells = []
-        for dy in [-4, -3, -2, -1, 0, 1, 2, 3, 4]:
-            for dx in [-4, -3, -2, -1, 0, 1, 2, 3, 4]:
-                num_x_pow_2 = math.pow((dx) * cosine_angle + (dy) * sine_angle, 2)
-                num_y_pow_2 = math.pow((dx) * sine_angle - (dy) * cosine_angle, 2)
-                result = num_x_pow_2 / a_pow_2 + num_y_pow_2 / b_pow_2
-                if result <= 1:
-                    body_cells.append((dx + self.pos_x, dy + self.pos_y))
-
-        self.body_cells = body_cells
-    
     def calculate_moving_direction(self, exit_x, exit_y):
         delta_x = self.pos_x - exit_x
         delta_y = self.pos_y - exit_y
