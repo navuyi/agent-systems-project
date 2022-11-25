@@ -12,8 +12,6 @@ from pygame.locals import (
     QUIT,
 )
 
-OBSTACLE_SHAPE_ELLIPSE = 0
-
 DEBUG_MODE = True
 
 cell_size = 0.1
@@ -59,13 +57,27 @@ class ExitCell(object):
     def __init__(self, pos_x, pos_y):
         self.pos_x = pos_x
         self.pos_y = pos_y
+        self.color = (255, 0, 0)
 
 
 class Obstacle(object):
-    def __init__(self, pos_x, pos_y, shape):
+    def __init__(self, pos_x, pos_y, angle_degrees, shape):
         self.pos_x = pos_x
         self.pos_y = pos_y
+        self.angle = angle_degrees
         self.shape = shape
+        self.color = (0, 255, 0)
+        self.body_cells = None
+
+    def calculate_cells(self):
+        self.shape.calculate_cells(pos_x=self.pos_x, pos_y=self.pos_y, angle_degrees=self.angle)
+        self.body_cells = self.shape.get_body_cells()
+    
+    def get_cells(self):
+        return self.body_cells
+    
+    def get_color(self):
+        return self.color
 
 
 class Human(object):
@@ -113,12 +125,22 @@ class Human(object):
         self.cell_center_pos_y = self.pos_y + (cell_size / 2)
 
 
-def init_grid(rows, cols, humans, exit_cell):
+def init_grid(rows, cols, humans, obstacles, exit_cell):
     white_color = (255, 255, 255)
-    black_color = (0, 0, 0)
     grid = np.zeros(shape=(rows, cols), dtype=[('x', 'int'), ('y', 'int'), ('z', 'int')])
     grid.fill(white_color)
 
+    # add obstacles to grid
+    for ob in obstacles:
+        ob.calculate_cells()
+        obstacle_cells = ob.get_cells()
+        for c in obstacle_cells:
+            grid[c[0], c[1]] = ob.get_color()
+
+    # add exit cell to grid
+    grid[exit_cell.pos_x, exit_cell.pos_y] = exit_cell.color
+
+    # add humans to grid
     for human in humans:
         human.calculate_body_cells()
         human_cells = human.get_body_cells()
@@ -126,18 +148,16 @@ def init_grid(rows, cols, humans, exit_cell):
         for bd in human_cells:
             grid[bd[0], bd[1]] = human_color
 
-    grid[exit_cell.pos_x, exit_cell.pos_y] = black_color
-
     return grid
 
 
-def update_grid(grid, humans, exit_cell):
+def update_grid(grid, humans, obstacles, exit_cell):
     for human in humans:
         human.move()
         human.calculate_moving_direction(exit_cell.pos_x, exit_cell.pos_y)
 
     rows, cols = grid.shape
-    new_grid = init_grid(rows, cols, humans, exit_cell)
+    new_grid = init_grid(rows, cols, humans, obstacles, exit_cell)
 
     return new_grid
 
@@ -171,7 +191,10 @@ if __name__ == "__main__":
         Human('third', 150, 20, exit_cell),
         Human('fourth', 150, 75, exit_cell)
     ]
-    grid = init_grid(rows, cols, humans, exit_cell)
+    obstacles = [
+        Obstacle(45, 45, 25, ShapeEllipse(a=4, b=4, rectangle_range=range(-5, 6)))
+    ]
+    grid = init_grid(rows, cols, humans, obstacles, exit_cell)
 
     draw_grid(screen, grid, window_width, window_height)
 
@@ -184,7 +207,7 @@ if __name__ == "__main__":
         
             if event.type == KEYDOWN:
                 if event.key == K_RIGHT:
-                    grid = update_grid(grid, humans, exit_cell)
+                    grid = update_grid(grid, humans, obstacles, exit_cell)
                     draw_grid(screen, grid, window_width, window_height)
 
     pygame.quit()
