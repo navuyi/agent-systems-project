@@ -74,6 +74,7 @@ class Human(object):
         self.shape = ShapeEllipse(a=2.5, b=1.5, rectangle_range=range(-4, 5)) # [-4, -3, -2, -1, 0, 1, 2, 3, 4]
         self.pos_x = cell_pos_x
         self.pos_y = cell_pos_y
+        self.color = tuple(np.random.randint(256, size=3))
 
         self.cell_center_pos_x = self.pos_x + (cell_size / 2)
         self.cell_center_pos_y = self.pos_y + (cell_size / 2)
@@ -82,12 +83,15 @@ class Human(object):
 
         self.calculate_moving_direction(first_known_exit_cell.pos_x, first_known_exit_cell.pos_y)
 
-    def get_body_cells(self):
-        return self.body_cells
+    def get_color(self):
+        return self.color
 
     def calculate_body_cells(self):
         self.shape.calculate_cells(pos_x=self.pos_x, pos_y=self.pos_y, angle_degrees=self.look_angle_alpha)
         self.body_cells = self.shape.get_body_cells()
+
+    def get_body_cells(self):
+        return self.body_cells
 
     def calculate_moving_direction(self, exit_x, exit_y):
         delta_x = self.pos_x - exit_x
@@ -117,9 +121,10 @@ def init_grid(rows, cols, humans, exit_cell):
 
     for human in humans:
         human.calculate_body_cells()
-        body_cells = human.get_body_cells()
-        for bd in body_cells:
-            grid[bd[0], bd[1]] = black_color
+        human_cells = human.get_body_cells()
+        human_color = human.get_color()
+        for bd in human_cells:
+            grid[bd[0], bd[1]] = human_color
 
     grid[exit_cell.pos_x, exit_cell.pos_y] = black_color
 
