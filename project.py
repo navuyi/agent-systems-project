@@ -35,6 +35,13 @@ def is_grid_block_free(grid, pos_x, pos_y):
     return False
 
 
+def is_grid_free_for_body_cells(grid, body_cells):
+    for pos in body_cells:
+        if not is_grid_block_free(grid, pos[0], pos[1]):
+            return False
+    return True
+
+
 class GridBlockTakenException(Exception):
     pass
 
@@ -103,12 +110,17 @@ class Human(object):
         self.pos_y = cell_pos_y
         self.color = tuple(np.random.randint(256, size=3))
 
-        self.cell_center_pos_x = self.pos_x + (cell_size / 2)
-        self.cell_center_pos_y = self.pos_y + (cell_size / 2)
+        self.calculate_cell_center()
 
         self.look_angle_alpha = 0.0
+        self.reverse_steps_x = []
+        self.reverse_steps_y = []
 
         self.calculate_moving_direction(first_known_exit_cell.pos_x, first_known_exit_cell.pos_y)
+
+    def calculate_cell_center(self):
+        self.cell_center_pos_x = self.pos_x + (cell_size / 2)
+        self.cell_center_pos_y = self.pos_y + (cell_size / 2)
 
     def get_name(self):
         return self.name
@@ -117,8 +129,30 @@ class Human(object):
         return self.color
 
     def calculate_body_cells(self, grid):
-        self.shape.calculate_cells(pos_x=self.pos_x, pos_y=self.pos_y, angle_degrees=self.look_angle_alpha)
-        self.body_cells = self.shape.get_body_cells()
+        while True:
+            self.shape.calculate_cells(pos_x=self.pos_x, pos_y=self.pos_y, angle_degrees=self.look_angle_alpha)
+            tmp_body_cells = self.shape.get_body_cells()
+            if is_grid_free_for_body_cells(grid, tmp_body_cells):
+                self.body_cells = tmp_body_cells
+                break
+
+            self.take_reverse_step()
+            self.change_moving_direction_as_grid_was_taken()
+
+    def take_reverse_step(self):
+        if not self.reverse_steps_x or not self.reverse_steps_y:
+            return
+
+        self.pos_x += self.reverse_steps_x[-1]
+        self.pos_y -= self.reverse_steps_y[-1]
+
+        self.calculate_cell_center()
+
+        self.reverse_steps_x.pop()
+        self.reverse_steps_y.pop()
+
+    def change_moving_direction_as_grid_was_taken(self):
+        self.look_angle_alpha += 20
 
     def get_body_cells(self):
         return self.body_cells
@@ -132,15 +166,19 @@ class Human(object):
     def move(self):
         if self.look_angle_alpha < 0:
             self.pos_y += 1
+            self.reverse_steps_y.append(-1)
         else:
             self.pos_y -= 1
+            self.reverse_steps_y.append(+1)
+
         if self.look_angle_alpha < -90 or self.look_angle_alpha > 90:
             self.pos_x += 1
+            self.reverse_steps_x.append(-1)
         else:
             self.pos_x -= 1
+            self.reverse_steps_x.append(+1)
         
-        self.cell_center_pos_x = self.pos_x + (cell_size / 2)
-        self.cell_center_pos_y = self.pos_y + (cell_size / 2)
+        self.calculate_cell_center()
 
 
 def init_grid(rows, cols, humans, obstacles, exit_cell):
