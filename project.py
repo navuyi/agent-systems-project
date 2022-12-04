@@ -104,7 +104,7 @@ class Obstacle(object):
 
 
 class Human(object):
-    def __init__(self, name, cell_pos_x, cell_pos_y, first_known_exit_cell):
+    def __init__(self, name, cell_pos_x, cell_pos_y):
         self.name = name
         self.shape = ShapeEllipse(a=2.5, b=1.5, rectangle_range=range(-4, 5)) # [-4, -3, -2, -1, 0, 1, 2, 3, 4]
         self.pos_x = cell_pos_x
@@ -117,7 +117,11 @@ class Human(object):
         self.reverse_steps_x = []
         self.reverse_steps_y = []
 
-        self.__calculate_moving_direction(first_known_exit_cell.pos_x, first_known_exit_cell.pos_y)
+    def __print_debug_info(self, last_step):
+        print("DEBUG:HUMAN:{}:{},{}:{}:{}:{},{}:{}".format(
+            self.name, self.pos_x, self.pos_y, self.look_angle_alpha, self.color, self.reverse_steps_x, self.reverse_steps_y,
+            last_step
+        ))
 
     def get_name(self):
         return self.name
@@ -128,18 +132,20 @@ class Human(object):
     def get_body_cells(self):
         return self.body_cells
 
-    def calculate_body_cells(self, grid):
+    def calculate_body_cells(self, grid, exit_cell):
+        self.__calculate_moving_direction(exit_cell)
+
         while True:
-            tries += 1
             self.shape.calculate_cells(pos_x=self.pos_x, pos_y=self.pos_y, angle_degrees=self.look_angle_alpha)
             tmp_body_cells = self.shape.get_body_cells()
             if is_grid_free_for_body_cells(grid, tmp_body_cells):
+                print("{} is returning proper body cells! {},{}".format(self.name, self.pos_x, self.pos_y))
                 self.body_cells = tmp_body_cells
                 break
 
             if self.__are_reverse_steps_available():
+                print("{} is taking reverse step! Current {},{}".format(self.name, self.pos_x, self.pos_y))
                 self.__take_reverse_step()
-            self.__change_moving_direction_as_grid_was_taken()
 
     def __are_reverse_steps_available(self):
         if not self.reverse_steps_x or not self.reverse_steps_y:
@@ -150,13 +156,13 @@ class Human(object):
     def __take_reverse_step(self):
         self.pos_x += self.reverse_steps_x[-1]
         self.pos_y += self.reverse_steps_y[-1]
-
+        self.pos_x += self.reverse_steps_x[-1]
+        self.pos_y += self.reverse_steps_y[-1]
         self.__calculate_cell_center()
 
         self.reverse_steps_x.pop()
         self.reverse_steps_y.pop()
 
-    def __change_moving_direction_as_grid_was_taken(self):
         if self.look_angle_alpha < 0:
             self.look_angle_alpha -= 90
         else:
@@ -166,29 +172,35 @@ class Human(object):
         self.cell_center_pos_x = self.pos_x + (cell_size / 2)
         self.cell_center_pos_y = self.pos_y + (cell_size / 2)
 
-    def __calculate_moving_direction(self, exit_x, exit_y):
-        delta_x = self.pos_x - exit_x
-        delta_y = self.pos_y - exit_y
+    def __calculate_moving_direction(self, exit_cell):
+        delta_x = self.pos_x - exit_cell.pos_x
+        delta_y = self.pos_y - exit_cell.pos_y
         tangent_radians = math.atan2(delta_y, delta_x)
         self.look_angle_alpha = math.degrees(tangent_radians)
     
-    def move(self, exit_x, exit_y):
+    def move(self):
+        debug_info = ''
         if self.look_angle_alpha < 0:
             self.pos_y += STEP_SIZE
             self.reverse_steps_y.append(-STEP_SIZE)
+            debug_info += "DOWN"
         else:
             self.pos_y -= STEP_SIZE
             self.reverse_steps_y.append(+STEP_SIZE)
+            debug_info += "UP"
 
         if self.look_angle_alpha < -90 or self.look_angle_alpha > 90:
             self.pos_x += STEP_SIZE
             self.reverse_steps_x.append(-STEP_SIZE)
+            debug_info += " RIGHT"
         else:
             self.pos_x -= STEP_SIZE
             self.reverse_steps_x.append(+STEP_SIZE)
-        
+            debug_info += " LEFT"
+
         self.__calculate_cell_center()
-        self.__calculate_moving_direction(exit_x, exit_y)
+        if DEBUG_MODE:
+            self.__print_debug_info(debug_info)
 
 
 def init_grid(rows, cols, humans, obstacles, exit_cell):
@@ -198,13 +210,12 @@ def init_grid(rows, cols, humans, obstacles, exit_cell):
     # add obstacles to grid, no collisions here
     for ob in obstacles:
         ob.calculate_cells()
-        obstacle_cells = ob.get_cells()
-        for c in obstacle_cells:
+        for c in ob.get_cells():
             grid[c[0], c[1]] = ob.get_color()
 
     # add exit cell to grid
     if not is_grid_block_free(grid, exit_cell.pos_x, exit_cell.pos_y):
-        raise GridBlockTakenException("Exit Cell could no be initialized at pos_x {} pos_y are already taken!".format(
+        raise GridBlockTakenException("Exit Cell could no be initialized at pos_x {} pos_y {} are already taken!".format(
             exit_cell.pos_x, exit_cell.pos_y
         ))
 
@@ -212,27 +223,26 @@ def init_grid(rows, cols, humans, obstacles, exit_cell):
 
     # add humans to grid
     for human in humans:
-        human.calculate_body_cells(grid)
-        human_cells = human.get_body_cells()
-        human_color = human.get_color()
-        for body_cell_pos in human_cells:
+        human.calculate_body_cells(grid, exit_cell)
+        for body_cell_pos in human.get_body_cells():
             if not is_grid_block_free(grid, body_cell_pos[0], body_cell_pos[1]):
-                raise GridBlockTakenException("Human {} could no be initialized at pos_x {} pos_y are already taken!".format(
+                raise GridBlockTakenException("Human {} could no be initialized at pos_x {} pos_y {} are already taken!".format(
                     human.get_name(), body_cell_pos[0], body_cell_pos[1]
                 ))
 
-            grid[body_cell_pos[0], body_cell_pos[1]] = human_color
+            grid[body_cell_pos[0], body_cell_pos[1]] = human.get_color()
 
     return grid
 
 
 def update_grid(grid, humans, obstacles, exit_cell):
+    print("\n")
     for human in humans:
-        human.move(exit_cell.pos_x, exit_cell.pos_y)
+        human.move()
 
     rows, cols = grid.shape
     new_grid = init_grid(rows, cols, humans, obstacles, exit_cell)
-
+    print("\n")
     return new_grid
 
 
@@ -260,17 +270,17 @@ if __name__ == "__main__":
 
     exit_cell = ExitCell(150, 50)
     humans = [
-        Human('first', 30, 35, exit_cell),
-        Human('second', 30, 85, exit_cell),
-        Human('third', 150, 20, exit_cell),
-        Human('fourth', 150, 75, exit_cell),
-        Human('fifth', 125, 50, exit_cell),
-        Human('sixth', 115, 20, exit_cell),
-        Human('seventh', 180, 20, exit_cell),
-        Human('eight', 180, 80, exit_cell),
-        Human('ninth', 165, 45, exit_cell),
-        Human('tenth', 65, 15, exit_cell),
-        Human('eleventh', 65, 65, exit_cell)
+        #Human('first', 30, 35),
+        #Human('second', 30, 85),
+        #Human('third', 150, 20),
+        #Human('fourth', 150, 75),
+        #Human('fifth', 125, 50),
+        Human('sixth', 115, 20),
+        #Human('seventh', 180, 20),
+        #Human('eight', 180, 80),
+        #Human('ninth', 165, 45),
+        Human('tenth', 65, 15),
+        #Human('eleventh', 65, 65)
     ]
     obstacles = [
         Obstacle(60, 45, 25, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6))),
