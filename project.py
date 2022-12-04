@@ -13,6 +13,7 @@ from pygame.locals import (
 )
 
 DEBUG_MODE = True
+GRID_FREE = (255, 255, 255) # white color
 
 cell_size = 0.1
 block_size_coefficient = 2.5
@@ -22,6 +23,10 @@ rows = int(room_width / cell_size)
 cols = int(room_height / cell_size)
 window_width = 1300
 window_height = (window_width * cols) / rows
+
+
+class GridBlockTakenException(Exception):
+    pass
 
 
 class ShapeEllipse(object):
@@ -95,6 +100,9 @@ class Human(object):
 
         self.calculate_moving_direction(first_known_exit_cell.pos_x, first_known_exit_cell.pos_y)
 
+    def get_name(self):
+        return self.name
+
     def get_color(self):
         return self.color
 
@@ -125,12 +133,21 @@ class Human(object):
         self.cell_center_pos_y = self.pos_y + (cell_size / 2)
 
 
-def init_grid(rows, cols, humans, obstacles, exit_cell):
-    white_color = (255, 255, 255)
-    grid = np.zeros(shape=(rows, cols), dtype=[('x', 'int'), ('y', 'int'), ('z', 'int')])
-    grid.fill(white_color)
+def is_grid_block_free(grid, pos_x, pos_y):
+    grid_block = grid[pos_x, pos_y]
+    if  grid_block[0] == GRID_FREE[0] and\
+        grid_block[1] == GRID_FREE[1] and\
+        grid_block[2] == GRID_FREE[2]:
+        return True
+    
+    return False
 
-    # add obstacles to grid
+
+def init_grid(rows, cols, humans, obstacles, exit_cell):
+    grid = np.zeros(shape=(rows, cols), dtype=[('x', 'int'), ('y', 'int'), ('z', 'int')])
+    grid.fill(GRID_FREE)
+
+    # add obstacles to grid, no collisions here
     for ob in obstacles:
         ob.calculate_cells()
         obstacle_cells = ob.get_cells()
@@ -138,6 +155,11 @@ def init_grid(rows, cols, humans, obstacles, exit_cell):
             grid[c[0], c[1]] = ob.get_color()
 
     # add exit cell to grid
+    if not is_grid_block_free(grid, exit_cell.pos_x, exit_cell.pos_y):
+        raise GridBlockTakenException("Exit Cell could no be initialized at pos_x {} pos_y are already taken!".format(
+            exit_cell.pos_x, exit_cell.pos_y
+        ))
+
     grid[exit_cell.pos_x, exit_cell.pos_y] = exit_cell.color
 
     # add humans to grid
@@ -145,8 +167,13 @@ def init_grid(rows, cols, humans, obstacles, exit_cell):
         human.calculate_body_cells()
         human_cells = human.get_body_cells()
         human_color = human.get_color()
-        for bd in human_cells:
-            grid[bd[0], bd[1]] = human_color
+        for body_cell_pos in human_cells:
+            if not is_grid_block_free(grid, body_cell_pos[0], body_cell_pos[1]):
+                raise GridBlockTakenException("Human {} could no be initialized at pos_x {} pos_y are already taken!".format(
+                    human.get_name(), body_cell_pos[0], body_cell_pos[1]
+                ))
+
+            grid[body_cell_pos[0], body_cell_pos[1]] = human_color
 
     return grid
 
@@ -191,7 +218,7 @@ if __name__ == "__main__":
         Human('third', 150, 20, exit_cell),
         Human('fourth', 150, 75, exit_cell),
         Human('fifth', 125, 50, exit_cell),
-        Human('sixth', 105, 25, exit_cell)
+        Human('sixth', 115, 20, exit_cell)
     ]
     obstacles = [
         Obstacle(60, 45, 25, ShapeEllipse(a=4, b=4, rectangle_range=range(-5, 6))),
