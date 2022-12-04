@@ -139,7 +139,6 @@ class Human(object):
             if self.__are_reverse_steps_available():
                 self.__take_reverse_step()
             self.__change_moving_direction_as_grid_was_taken()
-            #self.__clap_look_angle()
 
     def __are_reverse_steps_available(self):
         if not self.reverse_steps_x or not self.reverse_steps_y:
@@ -162,18 +161,6 @@ class Human(object):
         else:
             self.look_angle_alpha += 45
 
-    def __change_moving_direction_as_grid_was_taken_and_there_are_no_reverse_steps(self):
-        if self.look_angle_alpha < 0:
-            self.look_angle_alpha -= 115
-        else:
-            self.look_angle_alpha += 115
-
-    def __clap_look_angle(self):
-        if self.look_angle_alpha < -180:
-            self.look_angle_alpha = -180
-        if self.look_angle_alpha > 180:
-            self.look_angle_alpha = 180
-
     def __calculate_cell_center(self):
         self.cell_center_pos_x = self.pos_x + (cell_size / 2)
         self.cell_center_pos_y = self.pos_y + (cell_size / 2)
@@ -185,8 +172,6 @@ class Human(object):
         self.look_angle_alpha = math.degrees(tangent_radians)
     
     def move(self, exit_x, exit_y):
-        self.__calculate_moving_direction(exit_x, exit_y)
-
         if self.look_angle_alpha < 0:
             self.pos_y += STEP_SIZE
             self.reverse_steps_y.append(-STEP_SIZE)
@@ -202,6 +187,7 @@ class Human(object):
             self.reverse_steps_x.append(+STEP_SIZE)
         
         self.__calculate_cell_center()
+        self.__calculate_moving_direction(exit_x, exit_y)
 
 
 def init_grid(rows, cols, humans, obstacles, exit_cell):
