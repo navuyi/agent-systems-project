@@ -2,6 +2,7 @@
 import numpy as np
 import pygame
 import math
+import random
 from pygame.locals import (
     K_UP,
     K_DOWN,
@@ -89,7 +90,7 @@ class Obstacle(object):
         self.pos_y = pos_y
         self.angle = angle_degrees
         self.shape = shape
-        self.color = (0, 255, 0)
+        self.color = (0, 0, 0)
         self.body_cells = None
 
     def calculate_cells(self):
@@ -106,7 +107,7 @@ class Obstacle(object):
 class Human(object):
     def __init__(self, name, cell_pos_x, cell_pos_y):
         self.name = name
-        self.shape = ShapeEllipse(a=2.5, b=1.5, rectangle_range=range(-4, 5)) # [-4, -3, -2, -1, 0, 1, 2, 3, 4]
+        self.shape = ShapeEllipse(a=1.5, b=2.5, rectangle_range=range(-4, 5)) # [-4, -3, -2, -1, 0, 1, 2, 3, 4]
         self.pos_x = cell_pos_x
         self.pos_y = cell_pos_y
         self.color = tuple(np.random.randint(256, size=3))
@@ -134,17 +135,19 @@ class Human(object):
 
     def calculate_body_cells(self, grid, exit_cell):
         self.__calculate_moving_direction(exit_cell)
-
+        tries = 0
         while True:
+            tries += 1
+            if tries > 4:
+                break
+            
             self.shape.calculate_cells(pos_x=self.pos_x, pos_y=self.pos_y, angle_degrees=self.look_angle_alpha)
             tmp_body_cells = self.shape.get_body_cells()
             if is_grid_free_for_body_cells(grid, tmp_body_cells):
-                print("{} is returning proper body cells! {},{}".format(self.name, self.pos_x, self.pos_y))
                 self.body_cells = tmp_body_cells
                 break
 
             if self.__are_reverse_steps_available():
-                print("{} is taking reverse step! Current {},{}".format(self.name, self.pos_x, self.pos_y))
                 self.__take_reverse_step()
 
     def __are_reverse_steps_available(self):
@@ -156,17 +159,12 @@ class Human(object):
     def __take_reverse_step(self):
         self.pos_x += self.reverse_steps_x[-1]
         self.pos_y += self.reverse_steps_y[-1]
-        self.pos_x += self.reverse_steps_x[-1]
-        self.pos_y += self.reverse_steps_y[-1]
-        self.__calculate_cell_center()
-
         self.reverse_steps_x.pop()
         self.reverse_steps_y.pop()
 
-        if self.look_angle_alpha < 0:
-            self.look_angle_alpha -= 90
-        else:
-            self.look_angle_alpha += 90
+        self.__just_do_a_move(reverse_x=random.choice([True, False]), reverse_y=random.choice([True, False]))
+
+        self.__calculate_cell_center()
 
     def __calculate_cell_center(self):
         self.cell_center_pos_x = self.pos_x + (cell_size / 2)
@@ -178,9 +176,30 @@ class Human(object):
         tangent_radians = math.atan2(delta_y, delta_x)
         self.look_angle_alpha = math.degrees(tangent_radians)
     
-    def move(self):
+    def __is_angle_pointing_down(self):
+        return True if self.look_angle_alpha < 0 else False
+
+    def __is_angle_pointing_right(self):
+        return True if self.look_angle_alpha < -90 or self.look_angle_alpha > 90 else False
+
+    def __clap_angle(self):
+        if self.look_angle_alpha > 160:
+            self.look_angle_alpha = 160
+        elif self.look_angle_alpha < -160:
+            self.look_angle_alpha = -160
+
+    def __just_do_a_move(self, reverse_x=False, reverse_y=False):
         debug_info = ''
-        if self.look_angle_alpha < 0:
+        self.__clap_angle()
+        if reverse_x:
+            self.look_angle_alpha += -90 if self.look_angle_alpha < 0 else 90
+        if reverse_y:
+            self.look_angle_alpha *= -1
+
+        should_go_down = self.__is_angle_pointing_down()
+        should_go_right = self.__is_angle_pointing_right()
+
+        if should_go_down:
             self.pos_y += STEP_SIZE
             self.reverse_steps_y.append(-STEP_SIZE)
             debug_info += "DOWN"
@@ -189,7 +208,7 @@ class Human(object):
             self.reverse_steps_y.append(+STEP_SIZE)
             debug_info += "UP"
 
-        if self.look_angle_alpha < -90 or self.look_angle_alpha > 90:
+        if should_go_right:
             self.pos_x += STEP_SIZE
             self.reverse_steps_x.append(-STEP_SIZE)
             debug_info += " RIGHT"
@@ -197,10 +216,15 @@ class Human(object):
             self.pos_x -= STEP_SIZE
             self.reverse_steps_x.append(+STEP_SIZE)
             debug_info += " LEFT"
+        
+        return debug_info
 
+    def move(self):
+        debug_info = self.__just_do_a_move()
         self.__calculate_cell_center()
-        if DEBUG_MODE:
-            self.__print_debug_info(debug_info)
+
+        #if DEBUG_MODE:
+        #    self.__print_debug_info(debug_info)
 
 
 def init_grid(rows, cols, humans, obstacles, exit_cell):
@@ -225,10 +249,10 @@ def init_grid(rows, cols, humans, obstacles, exit_cell):
     for human in humans:
         human.calculate_body_cells(grid, exit_cell)
         for body_cell_pos in human.get_body_cells():
-            if not is_grid_block_free(grid, body_cell_pos[0], body_cell_pos[1]):
-                raise GridBlockTakenException("Human {} could no be initialized at pos_x {} pos_y {} are already taken!".format(
-                    human.get_name(), body_cell_pos[0], body_cell_pos[1]
-                ))
+            #if not is_grid_block_free(grid, body_cell_pos[0], body_cell_pos[1]):
+            #    raise GridBlockTakenException("Human {} could no be initialized at pos_x {} pos_y {} are already taken!".format(
+            #        human.get_name(), body_cell_pos[0], body_cell_pos[1]
+            #    ))
 
             grid[body_cell_pos[0], body_cell_pos[1]] = human.get_color()
 
@@ -236,13 +260,11 @@ def init_grid(rows, cols, humans, obstacles, exit_cell):
 
 
 def update_grid(grid, humans, obstacles, exit_cell):
-    print("\n")
     for human in humans:
         human.move()
 
     rows, cols = grid.shape
     new_grid = init_grid(rows, cols, humans, obstacles, exit_cell)
-    print("\n")
     return new_grid
 
 
@@ -270,17 +292,21 @@ if __name__ == "__main__":
 
     exit_cell = ExitCell(150, 50)
     humans = [
-        #Human('first', 30, 35),
-        #Human('second', 30, 85),
-        #Human('third', 150, 20),
-        #Human('fourth', 150, 75),
-        #Human('fifth', 125, 50),
+        Human('first', 30, 35),
+        Human('second', 30, 85),
+        Human('third', 163, 20),
+        Human('fourth', 150, 75),
+        Human('fifth', 125, 50),
         Human('sixth', 115, 20),
-        #Human('seventh', 180, 20),
-        #Human('eight', 180, 80),
-        #Human('ninth', 165, 45),
+        Human('seventh', 180, 20),
+        Human('eight', 180, 80),
+        Human('ninth', 165, 45),
         Human('tenth', 65, 15),
-        #Human('eleventh', 65, 65)
+        Human('eleventh', 65, 65),
+        Human('twelve', 20, 10),
+        Human('asdf', 20, 30),
+        Human('zxcv', 20, 55),
+        Human('qwer', 20, 75),
     ]
     obstacles = [
         Obstacle(60, 45, 25, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6))),
