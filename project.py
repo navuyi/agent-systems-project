@@ -154,9 +154,9 @@ class Human(object):
 
     def __change_moving_direction_as_grid_was_taken(self):
         if self.look_angle_alpha < 0:
-            self.look_angle_alpha -= 55
+            self.look_angle_alpha -= 90
         else:
-            self.look_angle_alpha += 55
+            self.look_angle_alpha += 90
 
     def __clap_look_angle(self):
         if self.look_angle_alpha < -180:
@@ -267,14 +267,23 @@ if __name__ == "__main__":
         Human('third', 150, 20, exit_cell),
         Human('fourth', 150, 75, exit_cell),
         Human('fifth', 125, 50, exit_cell),
-        Human('sixth', 115, 20, exit_cell)
+        Human('sixth', 115, 20, exit_cell),
+        Human('seventh', 180, 20, exit_cell),
+        Human('eight', 180, 80, exit_cell),
+        Human('ninth', 165, 45, exit_cell),
+        Human('tenth', 65, 15, exit_cell),
+        Human('eleventh', 65, 65, exit_cell)
     ]
     obstacles = [
-        Obstacle(60, 45, 25, ShapeEllipse(a=4, b=4, rectangle_range=range(-5, 6))),
+        Obstacle(60, 45, 25, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6))),
         Obstacle(145, 68, 25, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6))),
         Obstacle(105, 75, 25, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6))),
         Obstacle(125, 25, 25, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6))),
-        Obstacle(125, 75, 25, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6)))
+        Obstacle(125, 75, 25, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6))),
+        Obstacle(150, 30, 25, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6))),
+        Obstacle(165, 65, 25, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6))),
+        Obstacle(65, 30, 25, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6))),
+        Obstacle(75, 20, 25, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6)))
     ]
     grid = init_grid(rows, cols, humans, obstacles, exit_cell)
 
