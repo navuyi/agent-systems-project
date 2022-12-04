@@ -130,6 +130,7 @@ class Human(object):
 
     def calculate_body_cells(self, grid):
         while True:
+            tries += 1
             self.shape.calculate_cells(pos_x=self.pos_x, pos_y=self.pos_y, angle_degrees=self.look_angle_alpha)
             tmp_body_cells = self.shape.get_body_cells()
             if is_grid_free_for_body_cells(grid, tmp_body_cells):
@@ -157,9 +158,9 @@ class Human(object):
 
     def __change_moving_direction_as_grid_was_taken(self):
         if self.look_angle_alpha < 0:
-            self.look_angle_alpha -= 45
+            self.look_angle_alpha -= 90
         else:
-            self.look_angle_alpha += 45
+            self.look_angle_alpha += 90
 
     def __calculate_cell_center(self):
         self.cell_center_pos_x = self.pos_x + (cell_size / 2)
