@@ -110,7 +110,7 @@ class Human(object):
         self.pos_y = cell_pos_y
         self.color = tuple(np.random.randint(256, size=3))
 
-        self.calculate_cell_center()
+        self.__calculate_cell_center()
 
         self.look_angle_alpha = 0.0
         self.reverse_steps_x = []
@@ -118,15 +118,14 @@ class Human(object):
 
         self.calculate_moving_direction(first_known_exit_cell.pos_x, first_known_exit_cell.pos_y)
 
-    def calculate_cell_center(self):
-        self.cell_center_pos_x = self.pos_x + (cell_size / 2)
-        self.cell_center_pos_y = self.pos_y + (cell_size / 2)
-
     def get_name(self):
         return self.name
 
     def get_color(self):
         return self.color
+    
+    def get_body_cells(self):
+        return self.body_cells
 
     def calculate_body_cells(self, grid):
         while True:
@@ -136,26 +135,37 @@ class Human(object):
                 self.body_cells = tmp_body_cells
                 break
 
-            self.take_reverse_step()
-            self.change_moving_direction_as_grid_was_taken()
+            self.__take_reverse_step()
+            self.__change_moving_direction_as_grid_was_taken()
+            self.__clap_look_angle()
 
-    def take_reverse_step(self):
+    def __take_reverse_step(self):
         if not self.reverse_steps_x or not self.reverse_steps_y:
             return
 
         self.pos_x += self.reverse_steps_x[-1]
         self.pos_y -= self.reverse_steps_y[-1]
 
-        self.calculate_cell_center()
+        self.__calculate_cell_center()
 
         self.reverse_steps_x.pop()
         self.reverse_steps_y.pop()
 
-    def change_moving_direction_as_grid_was_taken(self):
-        self.look_angle_alpha += 20
+    def __change_moving_direction_as_grid_was_taken(self):
+        if self.look_angle_alpha < 0:
+            self.look_angle_alpha -= 30
+        else:
+            self.look_angle_alpha += 30
 
-    def get_body_cells(self):
-        return self.body_cells
+    def __clap_look_angle(self):
+        if self.look_angle_alpha < -180:
+            self.look_angle_alpha = -180
+        if self.look_angle_alpha > 180:
+            self.look_angle_alpha = 180
+
+    def __calculate_cell_center(self):
+        self.cell_center_pos_x = self.pos_x + (cell_size / 2)
+        self.cell_center_pos_y = self.pos_y + (cell_size / 2)
 
     def calculate_moving_direction(self, exit_x, exit_y):
         delta_x = self.pos_x - exit_x
@@ -178,7 +188,7 @@ class Human(object):
             self.pos_x -= 1
             self.reverse_steps_x.append(+1)
         
-        self.calculate_cell_center()
+        self.__calculate_cell_center()
 
 
 def init_grid(rows, cols, humans, obstacles, exit_cell):
