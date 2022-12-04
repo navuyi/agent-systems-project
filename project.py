@@ -14,6 +14,7 @@ from pygame.locals import (
 
 DEBUG_MODE = True
 GRID_FREE = (255, 255, 255) # white color
+STEP_SIZE = 2
 
 cell_size = 0.1
 block_size_coefficient = 2.5
@@ -144,7 +145,7 @@ class Human(object):
             return
 
         self.pos_x += self.reverse_steps_x[-1]
-        self.pos_y -= self.reverse_steps_y[-1]
+        self.pos_y += self.reverse_steps_y[-1]
 
         self.__calculate_cell_center()
 
@@ -153,9 +154,9 @@ class Human(object):
 
     def __change_moving_direction_as_grid_was_taken(self):
         if self.look_angle_alpha < 0:
-            self.look_angle_alpha -= 30
+            self.look_angle_alpha -= 55
         else:
-            self.look_angle_alpha += 30
+            self.look_angle_alpha += 55
 
     def __clap_look_angle(self):
         if self.look_angle_alpha < -180:
@@ -175,18 +176,18 @@ class Human(object):
     
     def move(self):
         if self.look_angle_alpha < 0:
-            self.pos_y += 1
-            self.reverse_steps_y.append(-1)
+            self.pos_y += STEP_SIZE
+            self.reverse_steps_y.append(-STEP_SIZE)
         else:
-            self.pos_y -= 1
-            self.reverse_steps_y.append(+1)
+            self.pos_y -= STEP_SIZE
+            self.reverse_steps_y.append(+STEP_SIZE)
 
         if self.look_angle_alpha < -90 or self.look_angle_alpha > 90:
-            self.pos_x += 1
-            self.reverse_steps_x.append(-1)
+            self.pos_x += STEP_SIZE
+            self.reverse_steps_x.append(-STEP_SIZE)
         else:
-            self.pos_x -= 1
-            self.reverse_steps_x.append(+1)
+            self.pos_x -= STEP_SIZE
+            self.reverse_steps_x.append(+STEP_SIZE)
         
         self.__calculate_cell_center()
 
@@ -261,8 +262,8 @@ if __name__ == "__main__":
 
     exit_cell = ExitCell(150, 50)
     humans = [
-        Human('first', 30, 20, exit_cell),
-        Human('second', 30, 75, exit_cell),
+        Human('first', 30, 35, exit_cell),
+        Human('second', 30, 85, exit_cell),
         Human('third', 150, 20, exit_cell),
         Human('fourth', 150, 75, exit_cell),
         Human('fifth', 125, 50, exit_cell),
