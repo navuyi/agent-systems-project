@@ -25,6 +25,16 @@ window_width = 1300
 window_height = (window_width * cols) / rows
 
 
+def is_grid_block_free(grid, pos_x, pos_y):
+    grid_block = grid[pos_x, pos_y]
+    if  grid_block[0] == GRID_FREE[0] and\
+        grid_block[1] == GRID_FREE[1] and\
+        grid_block[2] == GRID_FREE[2]:
+        return True
+    
+    return False
+
+
 class GridBlockTakenException(Exception):
     pass
 
@@ -106,7 +116,7 @@ class Human(object):
     def get_color(self):
         return self.color
 
-    def calculate_body_cells(self):
+    def calculate_body_cells(self, grid):
         self.shape.calculate_cells(pos_x=self.pos_x, pos_y=self.pos_y, angle_degrees=self.look_angle_alpha)
         self.body_cells = self.shape.get_body_cells()
 
@@ -133,16 +143,6 @@ class Human(object):
         self.cell_center_pos_y = self.pos_y + (cell_size / 2)
 
 
-def is_grid_block_free(grid, pos_x, pos_y):
-    grid_block = grid[pos_x, pos_y]
-    if  grid_block[0] == GRID_FREE[0] and\
-        grid_block[1] == GRID_FREE[1] and\
-        grid_block[2] == GRID_FREE[2]:
-        return True
-    
-    return False
-
-
 def init_grid(rows, cols, humans, obstacles, exit_cell):
     grid = np.zeros(shape=(rows, cols), dtype=[('x', 'int'), ('y', 'int'), ('z', 'int')])
     grid.fill(GRID_FREE)
@@ -164,7 +164,7 @@ def init_grid(rows, cols, humans, obstacles, exit_cell):
 
     # add humans to grid
     for human in humans:
-        human.calculate_body_cells()
+        human.calculate_body_cells(grid)
         human_cells = human.get_body_cells()
         human_color = human.get_color()
         for body_cell_pos in human_cells:
