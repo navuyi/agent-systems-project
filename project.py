@@ -189,12 +189,16 @@ if __name__ == "__main__":
         Human('first', 30, 20, exit_cell),
         Human('second', 30, 75, exit_cell),
         Human('third', 150, 20, exit_cell),
-        Human('fourth', 150, 75, exit_cell)
+        Human('fourth', 150, 75, exit_cell),
+        Human('fifth', 125, 50, exit_cell),
+        Human('sixth', 105, 25, exit_cell)
     ]
     obstacles = [
-        Obstacle(45, 45, 25, ShapeEllipse(a=4, b=4, rectangle_range=range(-5, 6))),
-        Obstacle(145, 65, 25, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6))),
-        Obstacle(105, 75, 25, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6)))
+        Obstacle(60, 45, 25, ShapeEllipse(a=4, b=4, rectangle_range=range(-5, 6))),
+        Obstacle(145, 68, 25, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6))),
+        Obstacle(105, 75, 25, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6))),
+        Obstacle(125, 25, 25, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6))),
+        Obstacle(125, 75, 25, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6)))
     ]
     grid = init_grid(rows, cols, humans, obstacles, exit_cell)
 
