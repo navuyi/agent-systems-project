@@ -105,9 +105,10 @@ class Obstacle(object):
 
 
 class Human(object):
-    def __init__(self, name, cell_pos_x, cell_pos_y):
+    def __init__(self, name, cell_pos_x, cell_pos_y, shape, step_size):
         self.name = name
-        self.shape = ShapeEllipse(a=1.5, b=2.5, rectangle_range=range(-4, 5)) # [-4, -3, -2, -1, 0, 1, 2, 3, 4]
+        self.shape = shape
+        self.step_size = step_size
         self.pos_x = cell_pos_x
         self.pos_y = cell_pos_y
         self.color = tuple(np.random.randint(256, size=3))
@@ -117,12 +118,6 @@ class Human(object):
         self.look_angle_alpha = 0.0
         self.reverse_steps_x = []
         self.reverse_steps_y = []
-
-    def __print_debug_info(self, last_step):
-        print("DEBUG:HUMAN:{}:{},{}:{}:{}:{},{}:{}".format(
-            self.name, self.pos_x, self.pos_y, self.look_angle_alpha, self.color, self.reverse_steps_x, self.reverse_steps_y,
-            last_step
-        ))
 
     def get_name(self):
         return self.name
@@ -200,31 +195,61 @@ class Human(object):
         should_go_right = self.__is_angle_pointing_right()
 
         if should_go_down:
-            self.pos_y += STEP_SIZE
-            self.reverse_steps_y.append(-STEP_SIZE)
+            self.pos_y += self.step_size
+            self.reverse_steps_y.append(-self.step_size)
             debug_info += "DOWN"
         else:
-            self.pos_y -= STEP_SIZE
-            self.reverse_steps_y.append(+STEP_SIZE)
+            self.pos_y -= self.step_size
+            self.reverse_steps_y.append(+self.step_size)
             debug_info += "UP"
 
         if should_go_right:
-            self.pos_x += STEP_SIZE
-            self.reverse_steps_x.append(-STEP_SIZE)
+            self.pos_x += self.step_size
+            self.reverse_steps_x.append(-self.step_size)
             debug_info += " RIGHT"
         else:
-            self.pos_x -= STEP_SIZE
-            self.reverse_steps_x.append(+STEP_SIZE)
+            self.pos_x -= self.step_size
+            self.reverse_steps_x.append(+self.step_size)
             debug_info += " LEFT"
         
         return debug_info
 
     def move(self):
-        debug_info = self.__just_do_a_move()
+        self.__just_do_a_move()
         self.__calculate_cell_center()
 
-        #if DEBUG_MODE:
-        #    self.__print_debug_info(debug_info)
+
+class Senior(Human):
+    def __init__(self, name, cell_pos_x, cell_pos_y):
+        super().__init__(
+            name=name,
+            cell_pos_x=cell_pos_x,
+            cell_pos_y=cell_pos_y,
+            shape=ShapeEllipse(a=1.0, b=2.0, rectangle_range=range(-4, 5)),  # [-4, -3, -2, -1, 0, 1, 2, 3, 4]
+            step_size=1
+        )
+
+
+class Mid(Human):
+    def __init__(self, name, cell_pos_x, cell_pos_y):
+        super().__init__(
+            name,
+            cell_pos_x,
+            cell_pos_y,
+            ShapeEllipse(a=1.5, b=2.5, rectangle_range=range(-4, 5)),  # [-4, -3, -2, -1, 0, 1, 2, 3, 4]
+            step_size=2
+        )
+
+
+class Child(Human):
+    def __init__(self, name, cell_pos_x, cell_pos_y):
+        super().__init__(
+            name,
+            cell_pos_x,
+            cell_pos_y,
+            ShapeEllipse(a=0.5, b=1.5, rectangle_range=range(-4, 5)),  # [-4, -3, -2, -1, 0, 1, 2, 3, 4]
+            step_size=1
+        )
 
 
 def init_grid(rows, cols, humans, obstacles, exit_cell):
@@ -292,21 +317,21 @@ if __name__ == "__main__":
 
     exit_cell = ExitCell(150, 50)
     humans = [
-        Human('first', 30, 35),
-        Human('second', 30, 85),
-        Human('third', 163, 20),
-        Human('fourth', 150, 75),
-        Human('fifth', 125, 50),
-        Human('sixth', 115, 20),
-        Human('seventh', 180, 20),
-        Human('eight', 180, 80),
-        Human('ninth', 165, 45),
-        Human('tenth', 65, 15),
-        Human('eleventh', 65, 65),
-        Human('twelve', 20, 10),
-        Human('asdf', 20, 30),
-        Human('zxcv', 20, 55),
-        Human('qwer', 20, 75),
+        Child('first', 30, 35),
+        Senior('second', 30, 85),
+        Mid('third', 163, 20),
+        Child('fourth', 150, 75),
+        Senior('fifth', 125, 50),
+        Mid('sixth', 115, 20),
+        Child('seventh', 180, 20),
+        Mid('eight', 180, 80),
+        Mid('ninth', 165, 45),
+        Senior('tenth', 65, 15),
+        Mid('eleventh', 65, 65),
+        Mid('twelve', 20, 10),
+        Child('asdf', 20, 30),
+        Senior('zxcv', 20, 55),
+        Child('qwer', 20, 75),
     ]
     obstacles = [
         Obstacle(60, 45, 25, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6))),
