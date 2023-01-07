@@ -13,6 +13,10 @@ from pygame.locals import (
 )
 
 
+# Configuration
+MAP = CLASS_214_MAP
+
+
 class GridBlockTakenException(Exception):
     pass
 
@@ -80,9 +84,9 @@ if __name__ == "__main__":
     screen.fill((128, 128, 128))
     clock = pygame.time.Clock()
 
-    humans = CLASS_214_MAP['humans']
-    obstacles = CLASS_214_MAP['obstacles']
-    exit_cell = CLASS_214_MAP['exit_cell']
+    humans = MAP['humans']
+    obstacles = MAP['obstacles']
+    exit_cell = MAP['exit_cell']
 
     grid = init_grid(rows, cols, humans, obstacles, exit_cell)
 
