@@ -43,11 +43,6 @@ def init_grid(rows, cols, humans, obstacles, exit_cell):
     for human in humans:
         human.calculate_body_cells(grid, exit_cell)
         for body_cell_pos in human.get_body_cells():
-            #if not is_grid_block_free(grid, body_cell_pos[0], body_cell_pos[1]):
-            #    raise GridBlockTakenException("Human {} could no be initialized at pos_x {} pos_y {} are already taken!".format(
-            #        human.get_name(), body_cell_pos[0], body_cell_pos[1]
-            #    ))
-
             grid[body_cell_pos[0], body_cell_pos[1]] = human.get_color()
 
     return grid

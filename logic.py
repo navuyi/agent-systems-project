@@ -62,6 +62,25 @@ class ShapeEllipse(object):
         return self.body_cells
 
 
+class ShapeRectangle(object):
+    def __init__(self, a, b):
+        self.a = a
+        self.b = b
+        self.body_cells = None
+    
+    def calculate_cells(self, pos_x, pos_y, angle_degrees=0):
+        body_cells = []
+
+        for dy in range(self.b):
+            for dx in range(self.a):
+                body_cells.append((dx + pos_x, dy + pos_y))
+        
+        self.body_cells = body_cells
+
+    def get_body_cells(self):
+        return self.body_cells
+
+
 class ExitCell(object):
     def __init__(self, pos_x, pos_y):
         self.pos_x = pos_x
@@ -103,6 +122,7 @@ class Human(object):
         self.look_angle_alpha = 0.0
         self.reverse_steps_x = []
         self.reverse_steps_y = []
+        self.steps_taken = 0
 
     def get_name(self):
         return self.name
@@ -197,6 +217,7 @@ class Human(object):
             self.reverse_steps_x.append(+self.step_size)
             debug_info += " LEFT"
         
+        self.steps_taken += 1
         return debug_info
 
     def move(self):

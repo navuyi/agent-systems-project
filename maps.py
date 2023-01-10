@@ -1,12 +1,11 @@
 
-from logic import ExitCell, Child, Mid, Senior, Obstacle, ShapeEllipse
+from logic import ExitCell, Child, Mid, Senior, Obstacle, ShapeEllipse, ShapeRectangle
 
+# ASSUMING THOSE PARAMETERS FOR MAPS
 # cell_size = 0.1
 # block_size_coefficient = 2.5
 # room_height = 10.0
 # room_width = 20.0
-
-# ASSUMING THOSE PARAMETERS FOR MAPS
 
 CLASS_214_MAP = {
     "exit_cell": ExitCell(150, 50),
@@ -28,7 +27,7 @@ CLASS_214_MAP = {
         Child('qwer', 20, 75),
     ],
     'obstacles': [
-        Obstacle(60, 45, 25, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6))),
+        Obstacle(60, 45, 25, ShapeRectangle(a=3, b=6)),
         Obstacle(145, 68, 25, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6))),
         Obstacle(105, 75, 25, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6))),
         Obstacle(125, 25, 25, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6))),
@@ -36,6 +35,7 @@ CLASS_214_MAP = {
         Obstacle(150, 30, 25, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6))),
         Obstacle(165, 65, 25, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6))),
         Obstacle(65, 30, 25, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6))),
-        Obstacle(75, 20, 25, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6)))
+        Obstacle(75, 20, 25, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6))),
+        Obstacle(10, 10, 25, ShapeRectangle(a=3, b=5))
     ]
 }
