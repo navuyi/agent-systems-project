@@ -33,6 +33,28 @@ def is_grid_free_for_body_cells(grid, body_cells):
     return True
 
 
+def human_is_at_the_exit_cell(human, exit_cell):
+    for bd in human.get_body_cells():
+        distance = math.pow(math.pow(bd[0]-exit_cell.pos_x, 2) + math.pow(bd[1]-exit_cell.pos_y, 2), 0.5)
+        if distance < 3:
+            print("{} has achieved exit cell with {} steps taken".format(human.get_name(), human.get_steps_taken()))
+            return True
+
+    return False
+
+
+def get_children_count(humans):
+    return sum(h.get_type() == 2 for h in humans)
+
+
+def get_mids_count(humans):
+    return sum(h.get_type() == 1 for h in humans)
+
+
+def get_senior_count(humans):
+    return sum(h.get_type() == 0 for h in humans)
+
+
 class ShapeEllipse(object):
     def __init__(self, a, b, rectangle_range):
         self.a = a
@@ -132,6 +154,9 @@ class Human(object):
     
     def get_body_cells(self):
         return self.body_cells
+
+    def get_steps_taken(self):
+        return self.steps_taken
 
     def calculate_body_cells(self, grid, exit_cell):
         self.__calculate_moving_direction(exit_cell)
@@ -234,6 +259,9 @@ class Senior(Human):
             shape=ShapeEllipse(a=1.0, b=2.0, rectangle_range=range(-4, 5)),  # [-4, -3, -2, -1, 0, 1, 2, 3, 4]
             step_size=1
         )
+    
+    def get_type(self):
+        return 0
 
 
 class Mid(Human):
@@ -246,6 +274,8 @@ class Mid(Human):
             step_size=2
         )
 
+    def get_type(self):
+        return 1
 
 class Child(Human):
     def __init__(self, name, cell_pos_x, cell_pos_y):
@@ -256,3 +286,6 @@ class Child(Human):
             ShapeEllipse(a=0.5, b=1.5, rectangle_range=range(-4, 5)),  # [-4, -3, -2, -1, 0, 1, 2, 3, 4]
             step_size=1
         )
+
+    def get_type(self):
+        return 2

@@ -1,7 +1,8 @@
 
 from logic import (
     GRID_FREE, is_grid_block_free, block_size_coefficient, window_height, window_width, rows, cols,
-    Mid, Child, Senior, Obstacle, ExitCell, ShapeEllipse
+    Mid, Child, Senior, Obstacle, ExitCell, ShapeEllipse,
+    human_is_at_the_exit_cell, get_children_count, get_mids_count, get_senior_count
 )
 from maps import CLASS_214_MAP
 import numpy as np
@@ -13,8 +14,11 @@ from pygame.locals import (
 )
 
 
-# Configuration
+# Configuration -> select map
 MAP = CLASS_214_MAP
+
+# Stats for grid
+TIME_TO_LEAVE_ALL_HUMANS = 0
 
 
 class GridBlockTakenException(Exception):
@@ -39,11 +43,29 @@ def init_grid(rows, cols, humans, obstacles, exit_cell):
 
     grid[exit_cell.pos_x, exit_cell.pos_y] = exit_cell.color
 
+    # when human is close to exit cell we want to remove it from scene
+    index_to_remove_human = []    
+
     # add humans to grid
-    for human in humans:
-        human.calculate_body_cells(grid, exit_cell)
-        for body_cell_pos in human.get_body_cells():
-            grid[body_cell_pos[0], body_cell_pos[1]] = human.get_color()
+    for i in range(len(humans)):
+        humans[i].calculate_body_cells(grid, exit_cell)
+
+        # check if any grid is so close to exit cell
+        if human_is_at_the_exit_cell(humans[i], exit_cell):
+            index_to_remove_human.append(i)
+
+        # write color of the human to the grid
+        for body_cell_pos in humans[i].get_body_cells():
+            grid[body_cell_pos[0], body_cell_pos[1]] = humans[i].get_color()
+
+    for i in index_to_remove_human:
+        humans.pop(i)
+
+    global TIME_TO_LEAVE_ALL_HUMANS
+    if not humans:
+        print("All humans has leaved the room in {} time_to_leave".format(TIME_TO_LEAVE_ALL_HUMANS))
+    else:
+        TIME_TO_LEAVE_ALL_HUMANS += 1
 
     return grid
 
@@ -82,6 +104,10 @@ if __name__ == "__main__":
     humans = MAP['humans']
     obstacles = MAP['obstacles']
     exit_cell = MAP['exit_cell']
+
+    print("Map consists of {} obstacles, {} humans, where there are {} children, {} mids and {} seniors".format(
+        len(obstacles), len(humans), get_children_count(humans), get_mids_count(humans), get_senior_count(humans)
+    ))
 
     grid = init_grid(rows, cols, humans, obstacles, exit_cell)
 
