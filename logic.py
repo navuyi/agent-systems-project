@@ -103,10 +103,30 @@ class ShapeRectangle(object):
         return self.body_cells
 
 
-class ExitCell(object):
-    def __init__(self, pos_x, pos_y):
+class SpecialCell(object):
+    def __init__(self, pos_x, pos_y, angle_degrees, shape):
         self.pos_x = pos_x
         self.pos_y = pos_y
+        self.angle = angle_degrees
+        
+        self.body_cells = None
+        self.shape = shape
+        self.calculate_cells()
+
+    def calculate_cells(self):
+        self.shape.calculate_cells(pos_x=self.pos_x, pos_y=self.pos_y, angle_degrees=self.angle)
+        self.body_cells = self.shape.get_body_cells()
+
+
+class PanicCell(SpecialCell):
+    def __init__(self, pos_x, pos_y, angle_degrees, shape):
+        super().__init__(pos_x, pos_y, angle_degrees, shape)
+        self.color = (255, 100, 100)
+
+
+class ExitCell(SpecialCell):
+    def __init__(self, pos_x, pos_y, angle_degrees, shape):
+        super().__init__(pos_x, pos_y, angle_degrees, shape)
         self.color = (255, 0, 0)
 
 
@@ -138,6 +158,7 @@ class Human(object):
         self.pos_x = cell_pos_x
         self.pos_y = cell_pos_y
         self.color = tuple(np.random.randint(256, size=3))
+        self.body_cells = []
 
         self.__calculate_cell_center()
 

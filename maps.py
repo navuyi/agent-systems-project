@@ -1,5 +1,5 @@
 
-from logic import ExitCell, Child, Mid, Senior, Obstacle, ShapeEllipse, ShapeRectangle
+from logic import ExitCell, Child, Mid, Senior, Obstacle, ShapeEllipse, ShapeRectangle, PanicCell
 
 # ASSUMING THOSE PARAMETERS FOR MAPS
 # cell_size = 0.1
@@ -8,7 +8,8 @@ from logic import ExitCell, Child, Mid, Senior, Obstacle, ShapeEllipse, ShapeRec
 # room_width = 20.0
 
 CLASS_214_MAP = {
-    "exit_cell": ExitCell(150, 50),
+    'panic_cell': PanicCell(25, 75, 0, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6))),
+    "exit_cell": ExitCell(150, 50, 0, ShapeEllipse(a=1, b=1, rectangle_range=range(-3, 3))),
     "humans": [
         Child('first', 30, 35),
         Senior('second', 30, 85),
@@ -27,15 +28,15 @@ CLASS_214_MAP = {
         Child('qwer', 20, 75),
     ],
     'obstacles': [
-        Obstacle(60, 45, 25, ShapeRectangle(a=3, b=6)),
-        Obstacle(145, 68, 25, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6))),
-        Obstacle(105, 75, 25, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6))),
-        Obstacle(125, 25, 25, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6))),
-        Obstacle(125, 75, 25, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6))),
-        Obstacle(150, 30, 25, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6))),
-        Obstacle(165, 65, 25, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6))),
-        Obstacle(65, 30, 25, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6))),
-        Obstacle(75, 20, 25, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6))),
-        Obstacle(10, 10, 25, ShapeRectangle(a=3, b=5))
+        Obstacle(60, 45, 0, ShapeRectangle(a=3, b=6)),
+        Obstacle(145, 68, 0, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6))),
+        Obstacle(105, 75, 0, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6))),
+        Obstacle(125, 25, 0, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6))),
+        Obstacle(125, 75, 0, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6))),
+        Obstacle(150, 30, 0, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6))),
+        Obstacle(165, 65, 0, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6))),
+        Obstacle(65, 30, 0, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6))),
+        Obstacle(75, 20, 0, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6))),
+        Obstacle(10, 10, 0, ShapeRectangle(a=3, b=5))
     ]
 }

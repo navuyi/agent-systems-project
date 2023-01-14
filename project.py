@@ -25,7 +25,7 @@ class GridBlockTakenException(Exception):
     pass
 
 
-def init_grid(rows, cols, humans, obstacles, exit_cell):
+def init_grid(rows, cols, humans, obstacles, exit_cell, panic_cell):
     grid = np.zeros(shape=(rows, cols), dtype=[('x', 'int'), ('y', 'int'), ('z', 'int')])
     grid.fill(GRID_FREE)
 
@@ -40,8 +40,16 @@ def init_grid(rows, cols, humans, obstacles, exit_cell):
         raise GridBlockTakenException("Exit Cell could no be initialized at pos_x {} pos_y {} are already taken!".format(
             exit_cell.pos_x, exit_cell.pos_y
         ))
+    for bd in exit_cell.body_cells:
+        grid[bd[0], bd[1]] = exit_cell.color
 
-    grid[exit_cell.pos_x, exit_cell.pos_y] = exit_cell.color
+    # add panic cell to grid
+    if not is_grid_block_free(grid, panic_cell.pos_x, panic_cell.pos_y):
+        raise GridBlockTakenException("Panic Cell could no be initialized at pos_x {} pos_y {} are already taken!".format(
+            panic_cell.pos_x, panic_cell.pos_y
+        ))
+    for bd in panic_cell.body_cells:
+        grid[bd[0], bd[1]] = panic_cell.color
 
     # when human is close to exit cell we want to remove it from scene
     index_to_remove_human = []    
@@ -70,12 +78,12 @@ def init_grid(rows, cols, humans, obstacles, exit_cell):
     return grid
 
 
-def update_grid(grid, humans, obstacles, exit_cell):
+def update_grid(grid, humans, obstacles, exit_cell, panic_cell):
     for human in humans:
         human.move()
 
     rows, cols = grid.shape
-    new_grid = init_grid(rows, cols, humans, obstacles, exit_cell)
+    new_grid = init_grid(rows, cols, humans, obstacles, exit_cell, panic_cell)
     return new_grid
 
 
@@ -104,12 +112,13 @@ if __name__ == "__main__":
     humans = MAP['humans']
     obstacles = MAP['obstacles']
     exit_cell = MAP['exit_cell']
+    panic_cell = MAP['panic_cell']
 
     print("Map consists of {} obstacles, {} humans, where there are {} children, {} mids and {} seniors".format(
         len(obstacles), len(humans), get_children_count(humans), get_mids_count(humans), get_senior_count(humans)
     ))
 
-    grid = init_grid(rows, cols, humans, obstacles, exit_cell)
+    grid = init_grid(rows, cols, humans, obstacles, exit_cell, panic_cell)
 
     draw_grid(screen, grid, window_width, window_height)
 
@@ -122,7 +131,7 @@ if __name__ == "__main__":
         
             if event.type == KEYDOWN:
                 if event.key == K_RIGHT:
-                    grid = update_grid(grid, humans, obstacles, exit_cell)
+                    grid = update_grid(grid, humans, obstacles, exit_cell, panic_cell)
                     draw_grid(screen, grid, window_width, window_height)
 
     pygame.quit()
