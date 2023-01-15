@@ -5,7 +5,7 @@ from logic import (
 )
 from excel import generate_csv_file_for_simulation
 from maps import (
-    CLASS_214_MAP, EMPTY_MAP_WITH_SPECIFIC_EXIT_CELL_1, EMPTY_MAP_WITH_SPECIFIC_EXIT_CELL_2
+    RANDOM_MAP, EMPTY_MAP_WITH_SPECIFIC_EXIT_CELL_1, EMPTY_MAP_WITH_SPECIFIC_EXIT_CELL_2
 )
 import numpy as np
 import pygame
@@ -13,7 +13,7 @@ import time
 
 
 # Configuration -> select map
-MAP = EMPTY_MAP_WITH_SPECIFIC_EXIT_CELL_2
+MAP = RANDOM_MAP
 
 # Stats for grid
 STEPS_TO_LEAVE_ALL_HUMANS = 0
@@ -132,7 +132,7 @@ if __name__ == "__main__":
     grid = init_grid(rows, cols, humans, obstacles, exit_cell, panic_cell)
 
     draw_grid(screen, grid, window_width, window_height)
-
+    time.sleep(3)
     running = True
 
     while running:

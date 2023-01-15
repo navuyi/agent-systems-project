@@ -51,29 +51,7 @@ EMPTY_MAP_WITH_SPECIFIC_EXIT_CELL_1 = {
     ]
 }
 
-EMPTY_MAP_WITH_SPECIFIC_EXIT_CELL_2 = EMPTY_MAP_WITH_SPECIFIC_EXIT_CELL_1
-EMPTY_MAP_WITH_SPECIFIC_EXIT_CELL_2['humans'] = [
-    # first series
-    Child('first', 125, 35),
-    Senior('second', 125, 50),
-    Mid('third', 125, 65),
-    Child('first_1', 140, 25),
-    Senior('second_1', 140, 50),
-    Mid('third_1', 140, 75),
-    Child('first_2', 150, 35),
-    Senior('second_2', 150, 50),
-    Mid('third_2', 150, 65),
-    # second series
-    Child('first_3', 130, 35),
-    Senior('second_3', 130, 50),
-    Mid('third_3', 130, 65),
-    Child('first_4', 115, 25),
-    Senior('second_4', 115, 50),
-    Mid('third_4', 115, 75),
-    Child('first_5', 145, 35),
-    Senior('second_5', 145, 50),
-    Mid('third_5', 145, 65)
-]
+EMPTY_MAP_WITH_SPECIFIC_EXIT_CELL_2 = EMPTY_MAP_WITH_SPECIFIC_EXIT_CELL_1.copy()
 EMPTY_MAP_WITH_SPECIFIC_EXIT_CELL_2['obstacles'] = [
     Obstacle(170, 26, 0, ShapeEllipse(a=30, b=10, rectangle_range=range(-19, 20), angle_degrees=45)), # upper wall
     Obstacle(170, 75, 0, ShapeEllipse(a=30, b=10, rectangle_range=range(-19, 20), angle_degrees=-45)), # down wall
@@ -82,36 +60,16 @@ EMPTY_MAP_WITH_SPECIFIC_EXIT_CELL_2['obstacles'] = [
     Obstacle(155, 84, 0, ShapeRectangle(a=15, b=15)), # down blocking
 ]
 
-CLASS_214_MAP = {
-    'panic_cell': PanicCell(25, 75, 0, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6))),
-    "exit_cell": ExitCell(150, 50, 0, ShapeEllipse(a=1, b=1, rectangle_range=range(-3, 3))),
-    "humans": [
-        Child('first', 30, 35),
-        Senior('second', 30, 85),
-        Mid('third', 163, 20),
-        Child('fourth', 150, 75),
-        Senior('fifth', 125, 50),
-        Mid('sixth', 115, 20),
-        Child('seventh', 180, 20),
-        Mid('eight', 180, 80),
-        Mid('ninth', 165, 45),
-        Senior('tenth', 65, 15),
-        Mid('eleventh', 65, 65),
-        Mid('twelve', 20, 10),
-        Child('thirteen', 20, 30),
-        Senior('fourteen', 20, 55),
-        Child('fifteen', 20, 75),
-    ],
-    'obstacles': [
-        Obstacle(60, 45, 0, ShapeRectangle(a=3, b=6)),
-        Obstacle(145, 68, 0, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6))),
-        Obstacle(105, 75, 0, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6))),
-        Obstacle(125, 25, 0, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6))),
-        Obstacle(125, 75, 0, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6))),
-        Obstacle(150, 30, 0, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6))),
-        Obstacle(165, 65, 0, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6))),
-        Obstacle(65, 30, 0, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6))),
-        Obstacle(75, 20, 0, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6))),
-        Obstacle(10, 10, 0, ShapeRectangle(a=3, b=5))
-    ]
-}
+RANDOM_MAP = EMPTY_MAP_WITH_SPECIFIC_EXIT_CELL_1.copy()
+RANDOM_MAP['obstacles'] = [
+    Obstacle(60, 45, 0, ShapeRectangle(a=3, b=6)),
+    Obstacle(145, 68, 0, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6))),
+    Obstacle(105, 75, 0, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6))),
+    Obstacle(125, 25, 0, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6))),
+    Obstacle(125, 75, 0, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6))),
+    Obstacle(150, 30, 0, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6))),
+    Obstacle(165, 65, 0, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6))),
+    Obstacle(65, 30, 0, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6))),
+    Obstacle(75, 20, 0, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6))),
+    Obstacle(10, 10, 0, ShapeRectangle(a=3, b=5))
+]
