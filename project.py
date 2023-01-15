@@ -120,9 +120,7 @@ if __name__ == "__main__":
 
     for i in range(len(humans)):
         humans[i].internal_index = i
-        #print("INTERNAL INDEX: {}".format(humans[i].internal_index))
-    HUMANS_INTERNAL_DATA = [[]] * len(humans) # [] for the len humans, [[]] internal for specific human [[{}, [}, {}], [{}, [}, {}]]]
-    #print(HUMANS_INTERNAL_DATA)
+    HUMANS_INTERNAL_DATA = [[]] * len(humans)
 
     print("Map consists of {} obstacles, {} humans, where there are {} children, {} mids and {} seniors".format(
         len(obstacles), len(humans), get_children_count(humans), get_mids_count(humans), get_senior_count(humans)
