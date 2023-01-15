@@ -20,6 +20,7 @@ MAP = CLASS_214_MAP
 # Stats for grid
 STEPS_TO_LEAVE_ALL_HUMANS = 0
 OCCUPANCY_RATE = []
+HUMANS_INTERNAL_DATA = None
 
 
 class GridBlockTakenException(Exception):
@@ -54,10 +55,13 @@ def init_grid(rows, cols, humans, obstacles, exit_cell, panic_cell):
 
     # when human is close to exit cell we want to remove it from scene
     index_to_remove_human = []
+    global HUMANS_INTERNAL_DATA
 
     # add humans to grid
     for i in range(len(humans)):
         humans[i].calculate_body_cells(grid, exit_cell)
+        humans[i].calculate_panic_coefficient(panic_cell, grid)
+        HUMANS_INTERNAL_DATA[i].append(humans[i].get_excel_row_for_statistics())
 
         if human_is_at_the_exit_cell(humans[i], exit_cell):
             index_to_remove_human.append(i)
@@ -117,6 +121,8 @@ if __name__ == "__main__":
     obstacles = MAP['obstacles']
     exit_cell = MAP['exit_cell']
     panic_cell = MAP['panic_cell']
+
+    HUMANS_INTERNAL_DATA = [[]] * len(humans)
 
     print("Map consists of {} obstacles, {} humans, where there are {} children, {} mids and {} seniors".format(
         len(obstacles), len(humans), get_children_count(humans), get_mids_count(humans), get_senior_count(humans)

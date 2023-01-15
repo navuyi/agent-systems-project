@@ -33,6 +33,14 @@ def is_grid_free_for_body_cells(grid, body_cells):
     return True
 
 
+def count_taken_grid_cells_for_body_cells(grid, body_cells):
+    count = 0
+    for pos in body_cells:
+        if not is_grid_block_free(grid, pos[0], pos[1]):
+            count += 1
+    return count
+
+
 def calculate_distance_between_two_cells(a_x, a_y, b_x, b_y):
     distance = math.pow(math.pow(a_x-b_x, 2) + math.pow(a_y-b_y, 2), 0.5)
     return distance
@@ -156,7 +164,7 @@ class Obstacle(object):
 
 
 class Human(object):
-    def __init__(self, name, cell_pos_x, cell_pos_y, shape, step_size):
+    def __init__(self, name, cell_pos_x, cell_pos_y, shape, step_size, human_type):
         self.name = name
         self.shape = shape
         self.step_size = step_size
@@ -164,13 +172,17 @@ class Human(object):
         self.pos_y = cell_pos_y
         self.color = tuple(np.random.randint(256, size=3))
         self.body_cells = []
-
         self.__calculate_cell_center()
-
         self.look_angle_alpha = 0.0
         self.reverse_steps_x = []
         self.reverse_steps_y = []
+        self.human_type = human_type
+
+        # stats
         self.steps_taken = 0
+        self.panic_ellipse = ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6))
+        self.distance_to_panic_cell = 0
+        self.crowd_density = 0
 
     def get_name(self):
         return self.name
@@ -183,6 +195,23 @@ class Human(object):
 
     def get_steps_taken(self):
         return self.steps_taken
+
+    def get_excel_row_for_statistics(self):
+        return {
+            "name": self.name,
+            'type': self.human_type,
+            'steps_taken': self.steps_taken,
+            'distance_to_panic': self.distance_to_panic_cell,
+            'crowd_density': self.crowd_density
+        }
+
+    def calculate_panic_coefficient(self, panic_cell, grid):
+        self.distance_to_panic_cell = calculate_distance_between_two_cells(self.pos_x, self.pos_y, panic_cell.pos_x, panic_cell.pos_y)
+
+        self.panic_ellipse.calculate_cells(self.pos_x, self.pos_y, 0)
+        bd = self.panic_ellipse.get_body_cells()
+        count_taken = count_taken_grid_cells_for_body_cells(grid, bd)
+        self.crowd_density = 100 * count_taken / len(bd)
 
     def calculate_body_cells(self, grid, exit_cell):
         self.__calculate_moving_direction(exit_cell)
@@ -283,7 +312,8 @@ class Senior(Human):
             cell_pos_x=cell_pos_x,
             cell_pos_y=cell_pos_y,
             shape=ShapeEllipse(a=1.0, b=2.0, rectangle_range=range(-4, 5)),  # [-4, -3, -2, -1, 0, 1, 2, 3, 4]
-            step_size=1
+            step_size=1,
+            human_type=0
         )
     
     def get_type(self):
@@ -297,7 +327,8 @@ class Mid(Human):
             cell_pos_x,
             cell_pos_y,
             ShapeEllipse(a=1.5, b=2.5, rectangle_range=range(-4, 5)),  # [-4, -3, -2, -1, 0, 1, 2, 3, 4]
-            step_size=2
+            step_size=2,
+            human_type=1
         )
 
     def get_type(self):
@@ -310,7 +341,8 @@ class Child(Human):
             cell_pos_x,
             cell_pos_y,
             ShapeEllipse(a=0.5, b=1.5, rectangle_range=range(-4, 5)),  # [-4, -3, -2, -1, 0, 1, 2, 3, 4]
-            step_size=1
+            step_size=1,
+            human_type=2
         )
 
     def get_type(self):
