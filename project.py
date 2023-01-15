@@ -18,7 +18,8 @@ from pygame.locals import (
 MAP = CLASS_214_MAP
 
 # Stats for grid
-TIME_TO_LEAVE_ALL_HUMANS = 0
+STEPS_TO_LEAVE_ALL_HUMANS = 0
+OCCUPANCY_RATE = []
 
 
 class GridBlockTakenException(Exception):
@@ -52,28 +53,31 @@ def init_grid(rows, cols, humans, obstacles, exit_cell, panic_cell):
         grid[bd[0], bd[1]] = panic_cell.color
 
     # when human is close to exit cell we want to remove it from scene
-    index_to_remove_human = []    
+    index_to_remove_human = []
 
     # add humans to grid
     for i in range(len(humans)):
         humans[i].calculate_body_cells(grid, exit_cell)
 
-        # check if any grid is so close to exit cell
         if human_is_at_the_exit_cell(humans[i], exit_cell):
             index_to_remove_human.append(i)
 
-        # write color of the human to the grid
         for body_cell_pos in humans[i].get_body_cells():
             grid[body_cell_pos[0], body_cell_pos[1]] = humans[i].get_color()
 
     for i in index_to_remove_human:
         humans.pop(i)
 
-    global TIME_TO_LEAVE_ALL_HUMANS
+    # Stats gathering per iteration
+    global STEPS_TO_LEAVE_ALL_HUMANS
+    global OCCUPANCY_RATE
     if not humans:
-        print("All humans has leaved the room in {} time_to_leave".format(TIME_TO_LEAVE_ALL_HUMANS))
+        print("All humans has leaved the room in {} steps_to_leave".format(STEPS_TO_LEAVE_ALL_HUMANS))
     else:
-        TIME_TO_LEAVE_ALL_HUMANS += 1
+        STEPS_TO_LEAVE_ALL_HUMANS += 1
+        OCCUPANCY_RATE.append(
+            {'all': len(humans), 'senior':  get_senior_count(humans), 'mid':  get_mids_count(humans), 'child': get_children_count(humans)}
+        )
 
     return grid
 
@@ -125,13 +129,10 @@ if __name__ == "__main__":
     running = True
 
     while running:
-        for event in pygame.event.get():   
-            if event.type == QUIT:
-                running = False
-        
-            if event.type == KEYDOWN:
-                if event.key == K_RIGHT:
-                    grid = update_grid(grid, humans, obstacles, exit_cell, panic_cell)
-                    draw_grid(screen, grid, window_width, window_height)
+        if not humans:
+            break
+
+        grid = update_grid(grid, humans, obstacles, exit_cell, panic_cell)
+        draw_grid(screen, grid, window_width, window_height)
 
     pygame.quit()

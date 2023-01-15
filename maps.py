@@ -23,9 +23,9 @@ CLASS_214_MAP = {
         Senior('tenth', 65, 15),
         Mid('eleventh', 65, 65),
         Mid('twelve', 20, 10),
-        Child('asdf', 20, 30),
-        Senior('zxcv', 20, 55),
-        Child('qwer', 20, 75),
+        Child('thirteen', 20, 30),
+        Senior('fourteen', 20, 55),
+        Child('fifteen', 20, 75),
     ],
     'obstacles': [
         Obstacle(60, 45, 0, ShapeRectangle(a=3, b=6)),

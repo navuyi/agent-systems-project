@@ -33,9 +33,14 @@ def is_grid_free_for_body_cells(grid, body_cells):
     return True
 
 
+def calculate_distance_between_two_cells(a_x, a_y, b_x, b_y):
+    distance = math.pow(math.pow(a_x-b_x, 2) + math.pow(a_y-b_y, 2), 0.5)
+    return distance
+
+
 def human_is_at_the_exit_cell(human, exit_cell):
     for bd in human.get_body_cells():
-        distance = math.pow(math.pow(bd[0]-exit_cell.pos_x, 2) + math.pow(bd[1]-exit_cell.pos_y, 2), 0.5)
+        distance = calculate_distance_between_two_cells(bd[0], bd[1], exit_cell.pos_x, exit_cell.pos_y)
         if distance < 3:
             print("{} has achieved exit cell with {} steps taken".format(human.get_name(), human.get_steps_taken()))
             return True
