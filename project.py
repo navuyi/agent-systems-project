@@ -4,13 +4,16 @@ from logic import (
     human_is_at_the_exit_cell, get_children_count, get_mids_count, get_senior_count
 )
 from excel import generate_csv_file_for_simulation
-from maps import CLASS_214_MAP
+from maps import (
+    CLASS_214_MAP, EMPTY_MAP_WITH_SPECIFIC_EXIT_CELL_1, EMPTY_MAP_WITH_SPECIFIC_EXIT_CELL_2
+)
 import numpy as np
 import pygame
+import time
 
 
 # Configuration -> select map
-MAP = CLASS_214_MAP
+MAP = EMPTY_MAP_WITH_SPECIFIC_EXIT_CELL_2
 
 # Stats for grid
 STEPS_TO_LEAVE_ALL_HUMANS = 0
@@ -64,9 +67,9 @@ def init_grid(rows, cols, humans, obstacles, exit_cell, panic_cell):
         for body_cell_pos in humans[i].get_body_cells():
             grid[body_cell_pos[0], body_cell_pos[1]] = humans[i].get_color()
 
-    for i in index_to_remove_human:
+    for i in sorted(index_to_remove_human, reverse=True):
         HUMANS_INTERNAL_DATA[humans[i].internal_index] = humans[i].internal_stats
-        humans.pop(i)
+        del humans[i]
 
     # Stats gathering per iteration
     global STEPS_TO_LEAVE_ALL_HUMANS
@@ -136,6 +139,7 @@ if __name__ == "__main__":
         if not humans:
             break
 
+        time.sleep(0.1)
         grid = update_grid(grid, humans, obstacles, exit_cell, panic_cell)
         draw_grid(screen, grid, window_width, window_height)
 

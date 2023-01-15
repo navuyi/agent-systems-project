@@ -16,8 +16,16 @@ window_width = 1300
 window_height = (window_width * cols) / rows
 
 
+def clamp(value, mx, mn):
+    if value > mx:
+        return mx
+    if value < mn:
+        return mn
+    return value
+
+
 def is_grid_block_free(grid, pos_x, pos_y):
-    grid_block = grid[pos_x, pos_y]
+    grid_block = grid[clamp(pos_x, 199, 0), clamp(pos_y, 99, 0)]
     if  grid_block[0] == GRID_FREE[0] and\
         grid_block[1] == GRID_FREE[1] and\
         grid_block[2] == GRID_FREE[2]:
@@ -49,7 +57,7 @@ def calculate_distance_between_two_cells(a_x, a_y, b_x, b_y):
 def human_is_at_the_exit_cell(human, exit_cell):
     for bd in human.get_body_cells():
         distance = calculate_distance_between_two_cells(bd[0], bd[1], exit_cell.pos_x, exit_cell.pos_y)
-        if distance < 3:
+        if distance < 4.5:
             print("{} has achieved exit cell with {} steps taken".format(human.get_name(), human.get_steps_taken()))
             return True
 
@@ -69,16 +77,20 @@ def get_senior_count(humans):
 
 
 class ShapeEllipse(object):
-    def __init__(self, a, b, rectangle_range):
+    def __init__(self, a, b, rectangle_range, angle_degrees=0):
         self.a = a
         self.b = b
         self.rectangle_range = list(rectangle_range)
         self.body_cells = None
+        self.angle_degrees = angle_degrees
 
-    def calculate_cells(self, pos_x, pos_y, angle_degrees):
+    def calculate_cells(self, pos_x, pos_y, angle_degrees=None):
         a_pow_2 = math.pow(self.a, 2)
         b_pow_2 = math.pow(self.b, 2)
-        angle_radians = math.radians(angle_degrees)
+        if angle_degrees:
+            angle_radians = math.radians(angle_degrees)
+        else:
+            angle_radians = math.radians(self.angle_degrees)
         sine_angle = math.sin(angle_radians)
         cosine_angle = math.cos(angle_radians)
 
