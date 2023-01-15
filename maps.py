@@ -61,15 +61,13 @@ EMPTY_MAP_WITH_SPECIFIC_EXIT_CELL_2['obstacles'] = [
 ]
 
 RANDOM_MAP = EMPTY_MAP_WITH_SPECIFIC_EXIT_CELL_1.copy()
-RANDOM_MAP['obstacles'] = [
-    Obstacle(60, 45, 0, ShapeRectangle(a=3, b=6)),
-    Obstacle(145, 68, 0, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6))),
-    Obstacle(105, 75, 0, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6))),
-    Obstacle(125, 25, 0, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6))),
-    Obstacle(125, 75, 0, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6))),
-    Obstacle(150, 30, 0, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6))),
-    Obstacle(165, 65, 0, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6))),
-    Obstacle(65, 30, 0, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6))),
-    Obstacle(75, 20, 0, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6))),
-    Obstacle(10, 10, 0, ShapeRectangle(a=3, b=5))
-]
+RANDOM_MAP['obstacles'].extend([
+    Obstacle(135, 55, 0, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6))),
+    Obstacle(105, 55, 0, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6))),
+    Obstacle(125, 45, 0, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6))),
+    Obstacle(125, 65, 0, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6))),
+    Obstacle(150, 55, 0, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6))),
+    Obstacle(115, 65, 0, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6))),
+    Obstacle(105, 34, 0, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6))),
+    Obstacle(75, 40, 0, ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6)))
+])
