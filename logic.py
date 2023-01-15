@@ -177,12 +177,14 @@ class Human(object):
         self.reverse_steps_x = []
         self.reverse_steps_y = []
         self.human_type = human_type
+        self.internal_index = 0
 
         # stats
         self.steps_taken = 0
         self.panic_ellipse = ShapeEllipse(a=3, b=3, rectangle_range=range(-5, 6))
         self.distance_to_panic_cell = 0
         self.crowd_density = 0
+        self.internal_stats = []
 
     def get_name(self):
         return self.name

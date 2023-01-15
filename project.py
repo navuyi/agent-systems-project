@@ -1,17 +1,12 @@
 
 from logic import (
     GRID_FREE, is_grid_block_free, block_size_coefficient, window_height, window_width, rows, cols,
-    Mid, Child, Senior, Obstacle, ExitCell, ShapeEllipse,
     human_is_at_the_exit_cell, get_children_count, get_mids_count, get_senior_count
 )
+from excel import generate_csv_file_for_simulation
 from maps import CLASS_214_MAP
 import numpy as np
 import pygame
-from pygame.locals import (
-    K_RIGHT,
-    KEYDOWN,
-    QUIT,
-)
 
 
 # Configuration -> select map
@@ -61,7 +56,7 @@ def init_grid(rows, cols, humans, obstacles, exit_cell, panic_cell):
     for i in range(len(humans)):
         humans[i].calculate_body_cells(grid, exit_cell)
         humans[i].calculate_panic_coefficient(panic_cell, grid)
-        HUMANS_INTERNAL_DATA[i].append(humans[i].get_excel_row_for_statistics())
+        humans[i].internal_stats.append(humans[i].get_excel_row_for_statistics())
 
         if human_is_at_the_exit_cell(humans[i], exit_cell):
             index_to_remove_human.append(i)
@@ -70,6 +65,7 @@ def init_grid(rows, cols, humans, obstacles, exit_cell, panic_cell):
             grid[body_cell_pos[0], body_cell_pos[1]] = humans[i].get_color()
 
     for i in index_to_remove_human:
+        HUMANS_INTERNAL_DATA[humans[i].internal_index] = humans[i].internal_stats
         humans.pop(i)
 
     # Stats gathering per iteration
@@ -122,7 +118,11 @@ if __name__ == "__main__":
     exit_cell = MAP['exit_cell']
     panic_cell = MAP['panic_cell']
 
-    HUMANS_INTERNAL_DATA = [[]] * len(humans)
+    for i in range(len(humans)):
+        humans[i].internal_index = i
+        #print("INTERNAL INDEX: {}".format(humans[i].internal_index))
+    HUMANS_INTERNAL_DATA = [[]] * len(humans) # [] for the len humans, [[]] internal for specific human [[{}, [}, {}], [{}, [}, {}]]]
+    #print(HUMANS_INTERNAL_DATA)
 
     print("Map consists of {} obstacles, {} humans, where there are {} children, {} mids and {} seniors".format(
         len(obstacles), len(humans), get_children_count(humans), get_mids_count(humans), get_senior_count(humans)
@@ -142,3 +142,5 @@ if __name__ == "__main__":
         draw_grid(screen, grid, window_width, window_height)
 
     pygame.quit()
+
+    generate_csv_file_for_simulation(HUMANS_INTERNAL_DATA, OCCUPANCY_RATE, STEPS_TO_LEAVE_ALL_HUMANS)
